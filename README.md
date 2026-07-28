@@ -70,7 +70,7 @@ The whole point. Recorded as a GIF:
 - [ ] `app/` + `build/Dockerfile` — small, reproducible demo service
 - [ ] CI: build → `syft` SBOM → `grype` gate
 - [ ] CI: `cosign sign` keyless + `cosign attest` (SLSA provenance, SBOM)
-- [ ] `cluster/bootstrap` — Kyverno install (targets the BastionCluster node)
+- [ ] `cluster/bootstrap` — Kyverno install (targets the KateClusters node)
 - [ ] `policies/kyverno` — `verifyImages` with issuer + subject pinning, Enforce
 - [ ] `tests/` — policy tests for allow and deny paths
 - [ ] Negative-path demo + GIF
@@ -78,4 +78,4 @@ The whole point. Recorded as a GIF:
 
 ## Related
 
-Runs on the cluster from [BastionCluster](../BastionCluster). Images are consumed there; the policies live here.
+Runs on the cluster from [KateClusters](../KateClusters). Images are consumed there; the policies live here.

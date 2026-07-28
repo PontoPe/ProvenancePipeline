@@ -2,7 +2,7 @@
 
 ## Scope
 
-The path from source commit to a running container: CI build, SBOM, scan, signing, attestation, registry, and admission control. The application's own logic is out of scope; the cluster's runtime hardening lives in [BastionCluster](../../BastionCluster).
+The path from source commit to a running container: CI build, SBOM, scan, signing, attestation, registry, and admission control. The application's own logic is out of scope; the cluster's runtime hardening lives in [KateClusters](../../KateClusters).
 
 ## Assets
 
