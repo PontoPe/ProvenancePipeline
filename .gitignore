@@ -1,0 +1,7 @@
+sbom.*.json
+*.sig
+*.att
+cosign.key
+cosign.pub
+.env
+kubeconfig
