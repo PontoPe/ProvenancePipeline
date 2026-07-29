@@ -127,6 +127,11 @@ delegating to a trusted generator such as `slsa-framework/slsa-github-generator`
 The [threat model](docs/threat-model.md) states the same limit in T3: provenance
 proves *where* an artifact came from, never that the source was benign.
 
+## Picking this up
+
+[docs/HANDOFF.md](docs/HANDOFF.md) — current state, the next steps in order, the
+blockers with their exact fixes, and the limitations stated plainly.
+
 ## Related
 
 Runs on the cluster from [KateClusters](../KateClusters). Images are consumed there; the policies live here.

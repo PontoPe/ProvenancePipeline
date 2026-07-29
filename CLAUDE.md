@@ -12,7 +12,8 @@ Owner: Pedro (GitHub `PontoPe`). Repo: `github.com/PontoPe/ProvenancePipeline`, 
 
 ## Where things stand
 
-Last updated: 2026-07-29. Full account in `docs/session-report.md`.
+Last updated: 2026-07-29. **Full handoff: `docs/HANDOFF.md`** — read that if you
+are picking this up cold. Blow-by-blow of the last session: `docs/session-report.md`.
 
 Done — the CI half is built and verified on a real run:
 
