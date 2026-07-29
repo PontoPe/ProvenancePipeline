@@ -1,36 +1,92 @@
 SHELL := /bin/bash
-IMAGE ?= ghcr.io/OWNER/provenance-demo
-TAG   ?= dev
-REF   := $(IMAGE):$(TAG)
-IDENTITY ?= https://github.com/OWNER/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main
+.SHELLFLAGS := -eu -o pipefail -c
+
+# Run from Git Bash or WSL on the Windows workstation — this is a POSIX Makefile.
+
+OWNER    ?= pontope
+REPO     ?= provenancepipeline
+IMAGE    ?= ghcr.io/$(OWNER)/$(REPO)
+TAG      ?= dev
+REF      := $(IMAGE):$(TAG)
+
+# The identity `cosign verify` must find in the Fulcio certificate. It is the
+# whole trust anchor: keyless signing has no key, so this string plus the issuer
+# is what separates "signed by our pipeline" from "signed by anybody".
+IDENTITY ?= https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main
 ISSUER   ?= https://token.actions.githubusercontent.com
 
-.PHONY: help build sbom scan push sign attest verify policy-install policy-test demo clean
+VERSION  ?= dev
+REVISION ?= $(shell git rev-parse HEAD)
+
+# Verification always targets a digest, never a tag — a tag is a mutable pointer
+# and the signature covers the digest. Resolve it from the registry if not given.
+DIGEST ?=
+digest = $(if $(DIGEST),$(DIGEST),$(shell docker buildx imagetools inspect $(REF) --format '{{.Manifest.Digest}}'))
+
+.PHONY: help test build sbom scan run push sign attest verify verify-github evidence clean \
+        policy-install policy-test demo
 
 help: ## show targets
-	@grep -hE '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | column -t -s $$'\t'
+	@grep -hE '^[a-z][a-z-]*:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | column -t -s $$'\t'
 
-build: ## build the demo image
-	docker build -t $(REF) build/
+test: ## go vet + unit tests
+	cd app && go vet ./... && go test -race ./...
 
-sbom: ## generate SBOM (SPDX + CycloneDX)
+build: ## build the demo image locally
+	docker build \
+		-f build/Dockerfile \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg REVISION=$(REVISION) \
+		--build-arg SOURCE_DATE_EPOCH=$$(git log -1 --pretty=%ct) \
+		-t $(REF) .
+
+sbom: ## generate SBOM (SPDX + CycloneDX) from the local image
 	syft $(REF) -o spdx-json=sbom.spdx.json -o cyclonedx-json=sbom.cdx.json
 
-scan: sbom ## fail on CRITICAL findings
+scan: sbom ## fail on CRITICAL findings — same threshold as CI
 	grype sbom:sbom.spdx.json --fail-on critical
 
-push: ## push image to registry
+run: ## run the image locally on :8080
+	docker run --rm -p 8080:8080 --read-only --cap-drop=ALL $(REF)
+
+push: ## push the local image
 	docker push $(REF)
 
-sign: ## keyless sign the pushed digest
-	cosign sign --yes $$(cosign triangulate --type digest $(REF))
+sign: ## keyless sign the published digest (normally CI's job)
+	cosign sign --yes $(IMAGE)@$(call digest)
 
-attest: ## attach SBOM + SLSA provenance attestations
-	cosign attest --yes --type spdxjson --predicate sbom.spdx.json $(REF)
+attest: ## attach the SBOM attestation (normally CI's job)
+	cosign attest --yes --type spdxjson --predicate sbom.spdx.json $(IMAGE)@$(call digest)
 
-verify: ## verify signature + provenance as the cluster would
-	cosign verify --certificate-identity=$(IDENTITY) --certificate-oidc-issuer=$(ISSUER) $(REF)
-	cosign verify-attestation --type spdxjson --certificate-identity=$(IDENTITY) --certificate-oidc-issuer=$(ISSUER) $(REF)
+verify: ## verify signature + SBOM + SLSA provenance as the cluster policy will
+	@echo "==> ref $(IMAGE)@$(call digest)"
+	cosign verify \
+		--certificate-identity "$(IDENTITY)" \
+		--certificate-oidc-issuer "$(ISSUER)" \
+		$(IMAGE)@$(call digest)
+	cosign verify-attestation --type spdxjson \
+		--certificate-identity "$(IDENTITY)" \
+		--certificate-oidc-issuer "$(ISSUER)" \
+		$(IMAGE)@$(call digest) \
+		| jq -r '.payload | @base64d | fromjson | .predicateType'
+	cosign verify-attestation --type slsaprovenance1 \
+		--certificate-identity "$(IDENTITY)" \
+		--certificate-oidc-issuer "$(ISSUER)" \
+		$(IMAGE)@$(call digest) \
+		| jq -r '.payload | @base64d | fromjson | .predicate'
+
+verify-github: ## verify GitHub's own build provenance (private repo => gh, not cosign)
+	gh attestation verify oci://$(IMAGE)@$(call digest) \
+		--repo PontoPe/ProvenancePipeline \
+		--signer-workflow PontoPe/ProvenancePipeline/.github/workflows/release.yml
+
+evidence: ## regenerate docs/evidence from a live verification run
+	./scripts/collect-evidence.sh
+
+clean:
+	rm -f sbom.*.json provenance.json
+
+# --- admission control: blocked on a cluster (KateClusters), see README roadmap ---
 
 policy-install: ## install Kyverno + the verifyImages policy
 	kubectl apply -k cluster/bootstrap
@@ -41,6 +97,3 @@ policy-test: ## kyverno policy unit tests
 
 demo: ## the money shot — signed pod admitted, unsigned pod denied
 	./scripts/demo.sh
-
-clean:
-	rm -f sbom.*.json

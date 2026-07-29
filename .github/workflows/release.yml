@@ -1,82 +1,298 @@
 name: release
 
+# Third-party actions are pinned by commit SHA, never by tag. A tag is a mutable
+# pointer an upstream maintainer (or whoever compromises them) can move; trusting
+# one here is T3 of the threat model walking in through the front door. The
+# human-readable version is kept in the trailing comment.
+
 on:
   push:
     branches: [main]
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: read
-  packages: write
-  id-token: write        # required for cosign keyless (Fulcio)
-  attestations: write
-
-env:
-  IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
-  build-sign-attest:
+  test:
+    name: test
     runs-on: ubuntu-latest
-    outputs:
-      digest: ${{ steps.push.outputs.digest }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: app/go.mod
+          cache-dependency-path: app/go.mod
+      - name: vet
+        run: go vet ./...
+        working-directory: app
+      - name: test
+        run: go test -race ./...
+        working-directory: app
 
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+  build-sign-attest:
+    name: build, sign, attest
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # push image + signature + attestations to GHCR
+      id-token: write # OIDC token exchanged with Fulcio for keyless signing
+      attestations: write # actions/attest-build-provenance
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+      digest: ${{ steps.push.outputs.digest }}
+      identity: ${{ steps.meta.outputs.identity }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: compute image ref and signing identity
+        id: meta
+        env:
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          # GHCR rejects uppercase path segments; github.repository preserves the
+          # owner's casing, so it has to be folded.
+          image="ghcr.io/$(printf '%s' "$REPOSITORY" | tr '[:upper:]' '[:lower:]')"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          # The exact Fulcio SAN this workflow will get. Everything downstream —
+          # the verify job, the Makefile, the Kyverno policy — pins this string.
+          echo "identity=https://github.com/${REPOSITORY}/.github/workflows/release.yml@${REF}" >> "$GITHUB_OUTPUT"
+          echo "source_date_epoch=$(git log -1 --pretty=%ct)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: build + push
+      - name: build and push
         id: push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
-          context: build
+          context: .
+          file: build/Dockerfile
           push: true
-          tags: ${{ env.IMAGE }}:${{ github.sha }}
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ github.sha }}
+            ${{ steps.meta.outputs.image }}:latest
+          build-args: |
+            VERSION=${{ github.ref_type == 'tag' && github.ref_name || format('0.0.0-{0}', github.sha) }}
+            REVISION=${{ github.sha }}
+            SOURCE_DATE_EPOCH=${{ steps.meta.outputs.source_date_epoch }}
+          # buildx would otherwise attach its own unsigned in-toto attestations as
+          # extra manifests in the index. We produce signed ones below instead, and
+          # a single-subject index keeps the digest that cosign signs unambiguous.
+          # ADR-004.
+          provenance: false
+          sbom: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: SBOM (syft)
-        uses: anchore/sbom-action@v0
+      - name: SBOM (syft, SPDX)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
-          image: ${{ env.IMAGE }}@${{ steps.push.outputs.digest }}
+          image: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
           format: spdx-json
           output-file: sbom.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
 
-      - name: scan (grype) — gate
-        uses: anchore/scan-action@v5
+      - name: SBOM (syft, CycloneDX)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      # The gate. It fails the build on CRITICAL and there is deliberately no
+      # continue-on-error, no soft-fail and no allowlist: a gate that is switched
+      # off to make a run green is worse than no gate, because it also lies.
+      # Threshold rationale: ADR-003.
+      - name: vulnerability gate (grype)
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
         with:
           sbom: sbom.spdx.json
           fail-build: true
           severity-cutoff: critical
+          output-format: table
 
-      - uses: sigstore/cosign-installer@v3
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
-      - name: sign (keyless)
-        run: cosign sign --yes ${IMAGE}@${{ steps.push.outputs.digest }}
+      - name: sign image (keyless)
+        env:
+          REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
+        run: cosign sign --yes "$REF"
 
-      - name: attest SBOM
+      - name: attest SBOM (SPDX)
+        env:
+          REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
+        run: cosign attest --yes --type spdxjson --predicate sbom.spdx.json "$REF"
+
+      # A second, cosign-native provenance attestation on top of
+      # actions/attest-build-provenance below. Reason: this repository is private,
+      # so GitHub's attestation is issued by its internal Sigstore instance and is
+      # only verifiable with `gh attestation verify`. Kyverno speaks cosign, not
+      # gh — so the copy the cluster will actually enforce has to live in public
+      # Rekor. ADR-005.
+      - name: build SLSA provenance predicate
+        env:
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}
+          SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY_ID: ${{ github.repository_id }}
+          REPOSITORY_OWNER_ID: ${{ github.repository_owner_id }}
+          IDENTITY: ${{ steps.meta.outputs.identity }}
+          STARTED_ON: ${{ github.event.repository.pushed_at }}
         run: |
-          cosign attest --yes --type spdxjson \
-            --predicate sbom.spdx.json \
-            ${IMAGE}@${{ steps.push.outputs.digest }}
+          set -euo pipefail
+          jq -n \
+            --arg repository "$REPOSITORY" \
+            --arg ref "$REF" \
+            --arg sha "$SHA" \
+            --arg run_id "$RUN_ID" \
+            --arg run_attempt "$RUN_ATTEMPT" \
+            --arg event_name "$EVENT_NAME" \
+            --arg repository_id "$REPOSITORY_ID" \
+            --arg repository_owner_id "$REPOSITORY_OWNER_ID" \
+            --arg identity "$IDENTITY" \
+            --arg finished_on "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{
+              buildDefinition: {
+                buildType: "https://github.com/PontoPe/ProvenancePipeline/build-types/github-actions/v1",
+                externalParameters: {
+                  workflow: {
+                    ref: $ref,
+                    repository: ("https://github.com/" + $repository),
+                    path: ".github/workflows/release.yml"
+                  }
+                },
+                internalParameters: {
+                  github: {
+                    event_name: $event_name,
+                    repository_id: $repository_id,
+                    repository_owner_id: $repository_owner_id
+                  }
+                },
+                resolvedDependencies: [
+                  {
+                    uri: ("git+https://github.com/" + $repository + "@" + $ref),
+                    digest: { gitCommit: $sha }
+                  }
+                ]
+              },
+              runDetails: {
+                builder: { id: $identity },
+                metadata: {
+                  invocationId: ("https://github.com/" + $repository + "/actions/runs/" + $run_id + "/attempts/" + $run_attempt),
+                  finishedOn: $finished_on
+                }
+              }
+            }' > provenance.json
+          jq . provenance.json
 
-      - name: SLSA provenance attestation
-        uses: actions/attest-build-provenance@v1
+      - name: attest SLSA provenance (cosign)
+        env:
+          REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
+        run: cosign attest --yes --type slsaprovenance1 --predicate provenance.json "$REF"
+
+      - name: attest build provenance (GitHub)
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
-          subject-name: ${{ env.IMAGE }}
+          subject-name: ${{ steps.meta.outputs.image }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
+      - name: upload SBOMs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sbom
+          path: |
+            sbom.spdx.json
+            sbom.cdx.json
+            provenance.json
+
   verify:
+    name: verify
     needs: build-sign-attest
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write # gh attestation verify against GitHub's instance
+      attestations: read
+    env:
+      REF: ${{ needs.build-sign-attest.outputs.image }}@${{ needs.build-sign-attest.outputs.digest }}
+      IDENTITY: ${{ needs.build-sign-attest.outputs.identity }}
+      ISSUER: https://token.actions.githubusercontent.com
     steps:
-      - uses: sigstore/cosign-installer@v3
-      - name: verify as the cluster policy does
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      # The package is private; cosign reads the docker credential store.
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Identity AND issuer, both exact. Identity alone is forgeable by any other
+      # OIDC issuer Fulcio accepts; issuer alone is every GitHub workflow on earth.
+      - name: verify signature
         run: |
           cosign verify \
-            --certificate-identity-regexp "^https://github.com/${{ github.repository }}/" \
-            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-            ${IMAGE}@${{ needs.build-sign-attest.outputs.digest }}
+            --certificate-identity "$IDENTITY" \
+            --certificate-oidc-issuer "$ISSUER" \
+            "$REF" | jq .
+
+      - name: verify SBOM attestation
+        run: |
+          cosign verify-attestation \
+            --type spdxjson \
+            --certificate-identity "$IDENTITY" \
+            --certificate-oidc-issuer "$ISSUER" \
+            "$REF" | jq -r '.payload | @base64d | fromjson | .predicateType'
+
+      - name: verify SLSA provenance attestation
+        run: |
+          cosign verify-attestation \
+            --type slsaprovenance1 \
+            --certificate-identity "$IDENTITY" \
+            --certificate-oidc-issuer "$ISSUER" \
+            "$REF" | jq -r '.payload | @base64d | fromjson | .predicate'
+
+      - name: verify GitHub build provenance
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh attestation verify "oci://$REF" \
+            --repo "${{ github.repository }}" \
+            --signer-workflow "${{ github.repository }}/.github/workflows/release.yml"
+
+      # A tampered digest must fail. Without this the verify job only proves the
+      # happy path, and a verifier that never says no is not a verifier.
+      - name: negative control — a digest we never signed must fail
+        run: |
+          set +e
+          FAKE="sha256:$(printf 'not-the-image' | sha256sum | cut -d' ' -f1)"
+          out=$(cosign verify \
+            --certificate-identity "$IDENTITY" \
+            --certificate-oidc-issuer "$ISSUER" \
+            "${{ needs.build-sign-attest.outputs.image }}@${FAKE}" 2>&1)
+          rc=$?
+          set -e
+          if [ $rc -eq 0 ]; then
+            echo "::error::cosign verified an image we never signed"
+            exit 1
+          fi
+          echo "expected failure, rc=$rc:"
+          echo "$out"

@@ -1,0 +1,4 @@
+# Build context is the repo root; everything that is not the service source is
+# noise and, worse, is surface for accidentally baking a secret into a layer.
+*
+!app/
