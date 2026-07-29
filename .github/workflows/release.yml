@@ -316,29 +316,18 @@ jobs:
         id: rekor
         run: |
           set -uo pipefail
-          # cosign v3 stops printing the log index on sign and leaves the inlined
-          # Bundle null, so the index is looked up from Rekor itself. For a
-          # hashedrekord the indexed artifact hash is the sha256 of the signed
-          # payload, which `cosign download signature` still hands us.
+          # cosign v3 emits Sigstore bundles (mediaType/verificationMaterial/
+          # dsseEnvelope), not the legacy {Payload,Bundle} envelope. The
+          # transparency log entry is carried inside the bundle itself, so no
+          # Rekor API round-trip is needed to cite it.
           : > rekor-entries.txt
           cosign download signature "$REF" > sigs.ndjson 2>/dev/null || true
           echo "signature envelopes: $(wc -l < sigs.ndjson)"
           echo "envelope keys: $(jq -r 'keys_unsorted | join(",")' sigs.ndjson 2>/dev/null | sort -u | tr '\n' ' ')"
 
-          # Key-name agnostic: cosign has moved this field's casing between
-          # versions and guessing it wrong silently yields zero entries.
-          jq -r 'to_entries[] | select(.key | ascii_downcase == "payload") | .value' sigs.ndjson 2>/dev/null \
-            | sort -u | while read -r p; do
-            h=$(printf '%s' "$p" | base64 -d 2>/dev/null | sha256sum | cut -d' ' -f1)
-            [ -z "$h" ] && continue
-            uuids=$(curl -sS --max-time 30 -X POST https://rekor.sigstore.dev/api/v1/index/retrieve \
-              -H 'Content-Type: application/json' -d "{\"hash\":\"sha256:${h}\"}" | jq -r '.[]?' 2>/dev/null)
-            for u in $uuids; do
-              curl -sS --max-time 30 "https://rekor.sigstore.dev/api/v1/log/entries/${u}" \
-                | jq -r --arg u "$u" '.[] | "uuid=\($u) logIndex=\(.logIndex) logID=\(.logID) integratedTime=\(.integratedTime)"' \
-                >> rekor-entries.txt 2>/dev/null
-            done
-          done
+          jq -r '.verificationMaterial.tlogEntries[]?
+                 | "logIndex=\(.logIndex) integratedTime=\(.integratedTime) kind=\(.kindVersion.kind)/\(.kindVersion.version)"' \
+            sigs.ndjson 2>/dev/null >> rekor-entries.txt
 
           sort -u -o rekor-entries.txt rekor-entries.txt
           if [ ! -s rekor-entries.txt ]; then
@@ -404,7 +393,7 @@ jobs:
           echo
           echo "## Rekor transparency log"
           echo
-          echo "Resolved from Rekor's public index by the sha256 of each signed payload."
+          echo "Read from the Sigstore bundle attached to the signature."
           echo
           echo '```console'
           cat rekor-entries.txt 2>/dev/null || echo "(not captured)"
