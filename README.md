@@ -129,8 +129,9 @@ proves *where* an artifact came from, never that the source was benign.
 
 ## Picking this up
 
-[docs/HANDOFF.md](docs/HANDOFF.md) — current state, the next steps in order, the
-blockers with their exact fixes, and the limitations stated plainly.
+[docs/PROVEhandoff.md](docs/PROVEhandoff.md) — current state, the next steps in
+order, the blockers with their exact fixes, and the limitations stated plainly.
+[docs/HANDBOOK.md](docs/HANDBOOK.md) — how the CI half was built, start to finish.
 
 ## Related
 

@@ -208,9 +208,10 @@ Windows 11, PowerShell 7. These cost time already:
 ## 11. Where to read next
 
 1. [README.md](../README.md) — what is proven, what is not, SLSA claim
-2. [docs/evidence/supply-chain-verification.md](evidence/supply-chain-verification.md) — the actual proof
-3. [docs/architecture.md](architecture.md) — ADR-001..007
-4. [docs/threat-model.md](threat-model.md) — T1..T8
-5. [docs/session-report.md](session-report.md) — what happened 2026-07-29, including scaffolding bugs found
-6. [docs/BLOCKED.md](BLOCKED.md) — exact errors, exact fixes
-7. [CLAUDE.md](../CLAUDE.md) — per-session context for Claude Code
+2. [docs/HANDBOOK.md](HANDBOOK.md) — how the CI half was built, start to finish, incl. the debugging journey
+3. [docs/evidence/supply-chain-verification.md](evidence/supply-chain-verification.md) — the actual proof
+4. [docs/architecture.md](architecture.md) — ADR-001..007
+5. [docs/threat-model.md](threat-model.md) — T1..T8
+6. [docs/session-report.md](session-report.md) — what happened 2026-07-29, including scaffolding bugs found
+7. [docs/BLOCKED.md](BLOCKED.md) — exact errors, exact fixes
+8. [CLAUDE.md](../CLAUDE.md) — per-session context for Claude Code
