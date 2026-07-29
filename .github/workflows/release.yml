@@ -62,6 +62,11 @@ jobs:
           # the verify job, the Makefile, the Kyverno policy — pins this string.
           echo "identity=https://github.com/${REPOSITORY}/.github/workflows/release.yml@${REF}" >> "$GITHUB_OUTPUT"
           echo "source_date_epoch=$(git log -1 --pretty=%ct)" >> "$GITHUB_OUTPUT"
+          # GitHub's attestation API is unavailable on user-owned private repos.
+          # Read the real visibility rather than assuming it, so the workflow
+          # starts producing GitHub attestations by itself if the repo is ever
+          # made public. ADR-005.
+          echo "private=${{ github.event.repository.private }}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
@@ -206,7 +211,13 @@ jobs:
           REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
         run: cosign attest --yes --type slsaprovenance1 --predicate provenance.json "$REF"
 
+      # Skipped while the repository is private: the attestations API answers
+      # "Feature not available for user-owned private repositories". This is a
+      # platform limit, not a relaxed control — the cosign slsaprovenance1
+      # attestation above is the SLSA provenance this project actually depends
+      # on, and unlike this one it is verifiable from public Rekor by Kyverno.
       - name: attest build provenance (GitHub)
+        if: steps.meta.outputs.private != 'true'
         uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-name: ${{ steps.meta.outputs.image }}
@@ -271,6 +282,7 @@ jobs:
             "$REF" | jq -r '.payload | @base64d | fromjson | .predicate'
 
       - name: verify GitHub build provenance
+        if: needs.build-sign-attest.result == 'success' && github.event.repository.private != true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
