@@ -77,6 +77,11 @@ make build sbom scan
 `syft --version` / `grype --version`. Only the daemon is missing. The same
 three steps run on every CI push, so the pipeline itself is not in doubt.
 
+`make` is also now installed (`scoop install make`, 4.4.1) — `winget install
+GnuWin32.Make` fails unattended with `0x800704c7 : The operation was canceled
+by the user`, which is the UAC prompt nobody was there to accept. `make help`
+and `make test` both run.
+
 ---
 
 ## B3 — demo GIF not recorded

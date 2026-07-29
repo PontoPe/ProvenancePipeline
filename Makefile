@@ -18,6 +18,14 @@ ISSUER   ?= https://token.actions.githubusercontent.com
 VERSION  ?= dev
 REVISION ?= $(shell git rev-parse HEAD)
 
+# -race needs cgo, and the Windows workstation has no C toolchain: `go test
+# -race` there fails with "-race requires cgo". CI runs on Linux and does use it.
+ifeq ($(OS),Windows_NT)
+RACE :=
+else
+RACE := -race
+endif
+
 # Verification always targets a digest, never a tag — a tag is a mutable pointer
 # and the signature covers the digest. Resolve it from the registry if not given.
 DIGEST ?=
@@ -30,7 +38,7 @@ help: ## show targets
 	@grep -hE '^[a-z][a-z-]*:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | column -t -s $$'\t'
 
 test: ## go vet + unit tests
-	cd app && go vet ./... && go test -race ./...
+	cd app && go vet ./... && go test $(RACE) ./...
 
 build: ## build the demo image locally
 	docker build \
@@ -75,7 +83,7 @@ verify: ## verify signature + SBOM + SLSA provenance as the cluster policy will
 		$(IMAGE)@$(call digest) \
 		| jq -r '.payload | @base64d | fromjson | .predicate'
 
-verify-github: ## verify GitHub's own build provenance (private repo => gh, not cosign)
+verify-github: ## verify GitHub's own build provenance (gh, not cosign — see ADR-005)
 	gh attestation verify oci://$(IMAGE)@$(call digest) \
 		--repo PontoPe/ProvenancePipeline \
 		--signer-workflow PontoPe/ProvenancePipeline/.github/workflows/release.yml
