@@ -323,8 +323,12 @@ jobs:
           : > rekor-entries.txt
           cosign download signature "$REF" > sigs.ndjson 2>/dev/null || true
           echo "signature envelopes: $(wc -l < sigs.ndjson)"
+          echo "envelope keys: $(jq -r 'keys_unsorted | join(",")' sigs.ndjson 2>/dev/null | sort -u | tr '\n' ' ')"
 
-          jq -r 'select(.Payload != null) | .Payload' sigs.ndjson 2>/dev/null | sort -u | while read -r p; do
+          # Key-name agnostic: cosign has moved this field's casing between
+          # versions and guessing it wrong silently yields zero entries.
+          jq -r 'to_entries[] | select(.key | ascii_downcase == "payload") | .value' sigs.ndjson 2>/dev/null \
+            | sort -u | while read -r p; do
             h=$(printf '%s' "$p" | base64 -d 2>/dev/null | sha256sum | cut -d' ' -f1)
             [ -z "$h" ] && continue
             uuids=$(curl -sS --max-time 30 -X POST https://rekor.sigstore.dev/api/v1/index/retrieve \
