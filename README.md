@@ -79,6 +79,10 @@ Real captured output, including the Rekor entries:
 make verify
 ```
 
+Reading the image back from GHCR needs a token with `read:packages` while the
+package is private (`gh auth refresh -h github.com -s read:packages`). The CI
+`verify` job runs the same commands on every push and needs no local setup.
+
 ## What is not proven yet
 
 The rejection. Nothing here shows a **cluster** refusing an unsigned image,
