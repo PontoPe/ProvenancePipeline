@@ -315,17 +315,32 @@ jobs:
       - name: capture Rekor transparency log entries
         id: rekor
         run: |
-          set -euo pipefail
-          # cosign v3 no longer prints the log index on sign, and the verify
-          # output carries an empty `optional` map. The bundle attached to the
-          # .sig tag still has it.
+          set -uo pipefail
+          # cosign v3 stops printing the log index on sign and leaves the inlined
+          # Bundle null, so the index is looked up from Rekor itself. For a
+          # hashedrekord the indexed artifact hash is the sha256 of the signed
+          # payload, which `cosign download signature` still hands us.
+          : > rekor-entries.txt
           cosign download signature "$REF" > sigs.ndjson 2>/dev/null || true
-          if [ -s sigs.ndjson ]; then
-            jq -r '.optional.Bundle.Payload | "logIndex=\(.logIndex) logID=\(.logID) integratedTime=\(.integratedTime)"' \
-              sigs.ndjson | sort -u | tee rekor-entries.txt
-          else
-            echo "cosign download signature returned nothing" | tee rekor-entries.txt
+          echo "signature envelopes: $(wc -l < sigs.ndjson)"
+
+          jq -r 'select(.Payload != null) | .Payload' sigs.ndjson 2>/dev/null | sort -u | while read -r p; do
+            h=$(printf '%s' "$p" | base64 -d 2>/dev/null | sha256sum | cut -d' ' -f1)
+            [ -z "$h" ] && continue
+            uuids=$(curl -sS --max-time 30 -X POST https://rekor.sigstore.dev/api/v1/index/retrieve \
+              -H 'Content-Type: application/json' -d "{\"hash\":\"sha256:${h}\"}" | jq -r '.[]?' 2>/dev/null)
+            for u in $uuids; do
+              curl -sS --max-time 30 "https://rekor.sigstore.dev/api/v1/log/entries/${u}" \
+                | jq -r --arg u "$u" '.[] | "uuid=\($u) logIndex=\(.logIndex) logID=\(.logID) integratedTime=\(.integratedTime)"' \
+                >> rekor-entries.txt 2>/dev/null
+            done
+          done
+
+          sort -u -o rekor-entries.txt rekor-entries.txt
+          if [ ! -s rekor-entries.txt ]; then
+            echo "no Rekor entries resolved" > rekor-entries.txt
           fi
+          cat rekor-entries.txt
 
       - name: generate evidence file
         env:
@@ -349,37 +364,50 @@ jobs:
           echo
           echo '```console'
           echo "\$ cosign verify --certificate-identity $IDENTITY --certificate-oidc-issuer $ISSUER $REF"
-          cosign verify --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" "$REF" 2>&1 | jq . 2>/dev/null \
-            || cosign verify --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" "$REF" 2>&1
+          # cosign writes the human-readable checklist to stderr and the payload
+          # JSON to stdout. Keeping them apart is what let the attestation blocks
+          # come out empty the first time this ran.
+          cosign verify --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" "$REF" \
+            > verify.json 2> verify.err
+          cat verify.err
+          jq . verify.json
           echo '```'
           echo
           echo "## cosign verify-attestation — SBOM (SPDX)"
           echo
           echo '```console'
           echo "\$ cosign verify-attestation --type spdxjson ... $REF"
-          cosign verify-attestation --type spdxjson --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" "$REF" 2>&1 \
-            | jq -r 'if type=="object" then (.payload | @base64d | fromjson | {predicateType, subject}) else . end' 2>/dev/null || true
+          cosign verify-attestation --type spdxjson \
+            --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" "$REF" \
+            > sbom-att.json 2> sbom-att.err
+          cat sbom-att.err
+          jq -r '.payload | @base64d | fromjson | {_type, predicateType, subject}' sbom-att.json
+          echo
+          echo "# packages recorded in the attested SBOM:"
+          jq -r '.payload | @base64d | fromjson | .predicate.packages | length' sbom-att.json
           echo '```'
           echo
           echo "## cosign verify-attestation — SLSA provenance v1"
           echo
           echo '```console'
           echo "\$ cosign verify-attestation --type slsaprovenance1 ... $REF"
-          cosign verify-attestation --type slsaprovenance1 --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" "$REF" 2>&1 \
-            | jq -r 'if type=="object" then (.payload | @base64d | fromjson) else . end' 2>/dev/null || true
+          cosign verify-attestation --type slsaprovenance1 \
+            --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" "$REF" \
+            > slsa-att.json 2> slsa-att.err
+          cat slsa-att.err
+          jq -r '.payload | @base64d | fromjson | {_type, predicateType, subject, predicate}' slsa-att.json
           echo '```'
           echo
           echo "## Rekor transparency log"
           echo
+          echo "Resolved from Rekor's public index by the sha256 of each signed payload."
+          echo
           echo '```console'
-          echo "\$ cosign download signature $REF | jq -r '.optional.Bundle.Payload'"
           cat rekor-entries.txt 2>/dev/null || echo "(not captured)"
           echo '```'
           echo
-          while read -r line; do
-            idx=$(printf '%s' "$line" | sed -n 's/.*logIndex=\([0-9]*\).*/\1/p')
-            [ -n "$idx" ] && echo "- Rekor entry: <https://search.sigstore.dev/?logIndex=$idx>"
-          done < rekor-entries.txt 2>/dev/null || true
+          sed -n 's/.*logIndex=\([0-9][0-9]*\).*/- Rekor entry: <https:\/\/search.sigstore.dev\/?logIndex=\1>/p' \
+            rekor-entries.txt 2>/dev/null | sort -u
           echo
           echo "## Negative control — an unsigned digest must be refused"
           echo
