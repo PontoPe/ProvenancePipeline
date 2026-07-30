@@ -7,7 +7,8 @@ be read start to finish by someone who wants to understand *how* this was put
 together, not just *what* exists.
 
 For the forward-looking state and next steps, read [PROVEhandoff.md](PROVEhandoff.md). For
-the terse blow-by-blow, [session-report.md](session-report.md). For the decision
+the terse blow-by-blow, [session-report.md](session-report.md) and
+[session-report-2026-07-29.md](session-report-2026-07-29.md). For the decision
 records, [architecture.md](architecture.md). This document overlaps all three on
 purpose — it is the connective tissue between them.
 

@@ -64,7 +64,9 @@ Full version in [docs/threat-model.md](docs/threat-model.md).
 | T4 | Signing key theft | Keyless signing — ephemeral Fulcio cert, no long-lived key to steal |
 | T5 | Signature stripped / replayed on a different image | Signature is over the image digest; policy pins digests, tags are not trusted |
 | T6 | Policy bypass via a namespace exempted from admission | Kyverno policy in `Enforce` with `failurePolicy: Fail`; exclusions enumerated and argued inline. Background scanning is off — image verification needs a registry round trip and only runs at admission |
-| T7 | Silent signing (nobody notices a rogue signature) | Rekor transparency log; provenance queries documented in the runbook |
+| T7 | Silent signing (nobody notices a rogue signature) | Rekor transparency log; provenance queries documented in the runbook. No automated monitoring yet |
+| T8 | Admission webhook unavailable → fail-open | `failurePolicy: Fail`. The API server rejects the pod rather than admitting it unchecked |
+| T9 | The one enforceable attestation stops being published | **No control.** Of the four Sigstore bundles per image, Kyverno can discover only GitHub's, and that step is gated on the repo being public. See [B5](docs/BLOCKED.md) |
 
 ## Layout
 

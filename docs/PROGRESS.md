@@ -325,3 +325,53 @@ credentials at all, because the GHCR package is public
 103 versions). No `read:packages` scope is needed any more.
 
 Next: step 6 — README, ADRs, handoff, session report.
+
+---
+
+## Step 6 — docs — DONE
+
+- `docs/architecture.md` — ADR-008 (NetworkPolicy ownership), **ADR-009**
+  (the cluster enforces GitHub's provenance, correcting ADR-005), ADR-010
+  (install integrity). ADR-005's status header now points at ADR-009 rather than
+  leaving two documents disagreeing.
+- `docs/threat-model.md` — T1/T3/T6/T8 rewritten from "planned" to "enforced,
+  and here is the evidence", and **T9 added** for the visibility coupling, with
+  its mitigation column honestly reading *None*.
+- `README.md` — the GIF at the top, roadmap boxes ticked, layout table, a "what
+  is not proven" section that names the label-gated scope and B5, and an SLSA
+  section that says **Build L2, verified at admission** and explains why
+  enforcement does not raise the level.
+- `docs/BLOCKED.md` — B1 and B3 resolved with the resolving output pasted in,
+  originals kept collapsed, **B5 added**, and the false claim in B4 corrected in
+  place instead of quietly deleted.
+- `docs/PROVEhandoff.md`, `CLAUDE.md` — current state, the corrected §3, cluster
+  gotchas.
+- `docs/session-report.md` — this session. The previous one is now
+  `docs/session-report-2026-07-29.md`.
+- `docs/demo-recording.md` + `scripts/demo-record.sh` — the recording recipe,
+  extracted so the sibling repos do not rediscover it. Writing it exposed that
+  the first recording had been made with `asciinema --idle-time-limit`, which
+  permanently discards real pauses, so the demo was re-recorded raw.
+
+## Final state, verified 2026-07-30
+
+```
+$ kyverno test tests/ --registry
+Test Summary: 9 tests passed and 0 tests failed
+
+$ kubectl get clusterpolicy
+NAME                ADMISSION   BACKGROUND   READY   AGE   MESSAGE
+verify-provenance   true        false        True    38m   Ready
+
+$ kubectl -n kyverno get pods
+kyverno-admission-controller-cfcff554b-kl4p6     1/1 Running
+kyverno-background-controller-67d887b64b-xg7wn   1/1 Running
+kyverno-cleanup-controller-6c8f748fc8-s56fd      1/1 Running
+kyverno-reports-controller-7f9d878cdc-dz2jv      1/1 Running
+
+$ kubectl -n kyverno get netpol --no-headers | wc -l
+5
+```
+
+All six steps done. The one thing left that affects whether enforcement keeps
+working is **B5** — see `docs/BLOCKED.md` and step 2 above for why.
