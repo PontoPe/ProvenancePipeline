@@ -1,0 +1,49 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Kyverno v1.18.2. The manifest is fetched and sha256-verified by
+# ./fetch-upstream.sh before this kustomization can build — see upstream.sha256.
+# `make policy-install` runs the fetch first; running `kubectl apply -k` directly
+# will fail with "upstream/install.yaml not found" until you do.
+resources:
+  - upstream/install.yaml
+  - networkpolicy.yaml
+
+# Every Kyverno image is pinned by digest. The tags below resolved on 2026-07-30
+# from reg.kyverno.io. This repo refuses mutable tags at admission; installing
+# its own enforcement plane from mutable tags would be incoherent.
+images:
+  - name: reg.kyverno.io/kyverno/kyverno
+    digest: sha256:0a540e2ddf74d0d2d3d45f9ef248d7dbc96576accdbcc6a2dd7eaff9fea56504
+  - name: reg.kyverno.io/kyverno/kyvernopre
+    digest: sha256:cd8cb4a31d25b3992734fb8f24a90ef691c90ce49338c89bea96792160eacb98
+  - name: reg.kyverno.io/kyverno/background-controller
+    digest: sha256:d62566ce41bd0d4a32bf2cf44b9ebfc02c36374f821f83070890287f62f68671
+  - name: reg.kyverno.io/kyverno/cleanup-controller
+    digest: sha256:b0395d29ae332276e6910eb40418be9bc127c068d659f90aa1bcddd6be99ccb4
+  - name: reg.kyverno.io/kyverno/reports-controller
+    digest: sha256:f09cf305170014e191b94e1c54f5be73163d8824eefad49349675c4efe43159a
+
+patches:
+  # Upstream ships the `kyverno` namespace with no Pod Security Admission
+  # labels. On this cluster that is already safe — the apiserver runs with an
+  # AdmissionConfiguration whose PodSecurity default is `restricted`, so an
+  # unlabelled namespace is restricted rather than unrestricted. Stating the
+  # labels anyway makes the intent auditable and means the namespace does not
+  # silently become permissive if that cluster-wide default is ever changed.
+  - target:
+      kind: Namespace
+      name: kyverno
+    patch: |-
+      - op: add
+        path: /metadata/labels/pod-security.kubernetes.io~1enforce
+        value: restricted
+      - op: add
+        path: /metadata/labels/pod-security.kubernetes.io~1enforce-version
+        value: latest
+      - op: add
+        path: /metadata/labels/pod-security.kubernetes.io~1audit
+        value: restricted
+      - op: add
+        path: /metadata/labels/pod-security.kubernetes.io~1warn
+        value: restricted

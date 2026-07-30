@@ -1,0 +1,150 @@
+# Network policy for the Kyverno namespace.
+#
+# Why this lives in THIS repo and not in KateClusters: whoever installs Kyverno
+# owns Kyverno's network requirements. KateClusters applies a per-namespace
+# `default-deny-all` to every namespace it creates; it does not and should not
+# know that a namespace called `kyverno` needs to reach a container registry.
+#
+# A correction to the assumption this was written against: KateClusters' deny is
+# NOT cluster-wide. There is no Calico GlobalNetworkPolicy and no default-deny in
+# any namespace but the ones KateClusters manages, so a freshly created `kyverno`
+# namespace starts fully open. That means these policies are not unblocking
+# Kyverno from an inherited deny — they are *applying* the cluster's posture to a
+# namespace that would otherwise escape it. Same destination, opposite direction,
+# and worth stating plainly rather than letting the file imply otherwise.
+#
+# Shape and RFC1918 exclusion list deliberately mirror
+# KateClusters' falco/allow-falco-ruleset-fetch, so the two repos read the same.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: kyverno
+  annotations:
+    provenancepipeline.io/rationale: >-
+      Baseline. Every allow below is additive and scoped. Matches the posture
+      KateClusters applies to namespaces it owns.
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: kyverno
+  annotations:
+    provenancepipeline.io/rationale: >-
+      Kyverno resolves ghcr.io, fulcio.sigstore.dev, rekor.sigstore.dev and
+      tuf-repo-cdn.sigstore.dev. Without DNS the image verification fails closed
+      and, under failureAction Enforce, every matching pod is denied.
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-apiserver-egress
+  namespace: kyverno
+  annotations:
+    provenancepipeline.io/rationale: >-
+      All four controllers watch the API and run leader election. Both
+      destinations are listed because kube-proxy DNATs the `kubernetes` service
+      ClusterIP (10.96.0.1:443) to the control-plane endpoint
+      (192.168.100.127:6443) and Calico evaluates policy after DNAT — the
+      ClusterIP entry documents intent, the endpoint entry is the one that
+      actually matches. Node IP is hardcoded because this is a known single-node
+      cluster; a multi-node install must widen it to the control-plane subnet.
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: kyverno
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 192.168.100.127/32
+      ports:
+        - port: 6443
+          protocol: TCP
+    - to:
+        - ipBlock:
+            cidr: 10.96.0.1/32
+      ports:
+        - port: 443
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-sigstore-and-registry-egress
+  namespace: kyverno
+  annotations:
+    provenancepipeline.io/rationale: >-
+      The admission controller fetches the signature bundle from ghcr.io and the
+      Sigstore trust root from tuf-repo-cdn.sigstore.dev. Those are public IPs
+      that change, so they cannot be enumerated; RFC1918 is excluded instead, so
+      a compromised Kyverno pod still cannot reach the LAN or any in-cluster
+      service. Port 443 only.
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: kyverno
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-webhook-ingress-from-apiserver
+  namespace: kyverno
+  annotations:
+    provenancepipeline.io/rationale: >-
+      The apiserver calls the admission and cleanup webhooks on 9443. It runs
+      with hostNetwork on the control-plane node, so the source address is the
+      node IP. This is the rule that must not be wrong: the verifyImages policy
+      runs with failurePolicy Fail, so blocking 9443 makes the apiserver reject
+      every pod create it covers.
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: kyverno
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 192.168.100.127/32
+      ports:
+        - port: 9443
+          protocol: TCP
