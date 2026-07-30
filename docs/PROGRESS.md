@@ -75,7 +75,7 @@ Next: step 2.
 
 ---
 
-## Step 2 — prove Kyverno can verify these signatures — IN PROGRESS
+## Step 2 — prove Kyverno can verify these signatures — DONE, verified
 
 Blocking finding, established before writing any policy. The registry holds
 **four** Sigstore bundles for
@@ -126,5 +126,122 @@ There is no such flag. `cosign sign --help` on 3.1.2 lists `--bundle`,
 selectable at this version. The remaining lever is the cosign *version*, not a
 flag.
 
-Next: run the empirical probe against the live digest and record which policy
-shapes actually pass.
+### Probe results — `type: SigstoreBundle` works, and both pins are load-bearing
+
+Kyverno v1.18.2 supports the new bundle format through
+`verifyImages[].type: SigstoreBundle`. Every case below was run in **Enforce**
+with `failurePolicy: Fail`, against the live `latest` digest. `keyless` requires
+`rekor.url` or `roots`, or the policy is rejected at admission:
+
+```
+spec.rules[0].verifyImages[0].attestors[0].entries[0].keyless: Invalid value: {...}:
+Either Rekor URL or roots are required
+```
+
+| probe | image | expected | actual |
+|---|---|---|---|
+| correct subject + issuer | our signed digest | admit | **admitted** |
+| correct subject + issuer | `busybox` (unsigned) | deny | **denied** |
+| correct subject + issuer | `reg.kyverno.io/kyverno/kyverno` (signed, other identity) | deny | **denied** |
+| **wrong subject** (different workflow, same repo) | our signed digest | deny | **denied** |
+| **wrong issuer** (`accounts.google.com`) | our signed digest | deny | **denied** |
+
+The last two are the ones that matter: they prove the policy is verifying the
+identity rather than merely noticing that a signature exists, and they justify
+pinning both values instead of one. Denial message in all cases:
+
+```
+sigstore bundle verification failed: no matching signatures found
+```
+
+### Which SLSA attestation is actually enforceable — ADR-005 is inverted
+
+Attestation conditions are evaluated with the **predicate as the context root**,
+not the in-toto statement. `EvaluateConditions` in
+`pkg/engine/internal/utils.go` does `s["predicate"]` and adds that. So keys are
+`{{ runDetails.builder.id }}`, never `{{ predicate.runDetails.builder.id }}`.
+Getting this wrong produces:
+
+```
+failed to resolve predicate.buildDefinition.buildType at path /0/all/0/key:
+JMESPath query failed: Unknown key "predicate" in path
+```
+
+With the path fixed, pinning `buildDefinition.buildType`:
+
+| pinned buildType | belongs to | result |
+|---|---|---|
+| `https://actions.github.io/buildtypes/workflow/v1` | `actions/attest-build-provenance` | **admitted** |
+| `https://github.com/PontoPe/ProvenancePipeline/build-types/github-actions/v1` | `cosign attest --type slsaprovenance1` | **denied** |
+
+So the cluster can enforce **GitHub's** provenance and **cannot** enforce
+cosign's — the exact opposite of what ADR-005 asserts. ADR-009 records this.
+
+Consequence the policy is written around: both predicates agree on
+`runDetails.builder.id`, `buildDefinition.externalParameters.workflow.repository`
+and `.ref`. The policy pins those three and deliberately does not pin
+`buildType`, so it holds against either provenance document and does not have to
+be rewritten if cosign's bundle later becomes discoverable.
+
+### Operational coupling this creates — important
+
+`.github/workflows/release.yml:220` gates `actions/attest-build-provenance` on
+`if: steps.meta.outputs.private != 'true'`. That step now produces the only
+attestation the cluster can enforce. **If the repository is ever made private
+again, new images will carry no enforceable provenance and this policy will deny
+every one of them.** Previously that step was the optional extra; it is now
+load-bearing. Not fixed in this session — see BLOCKED.md B5.
+
+Next: step 3.
+
+---
+
+## Step 3 — `policies/kyverno/verify-images.yaml` — DONE, verified
+
+`ClusterPolicy verify-provenance`, two rules, both `failureAction: Enforce`,
+`webhookConfiguration.failurePolicy: Fail`.
+
+- Rule 1 `verify-own-images` — images matching
+  `ghcr.io/pontope/provenancepipeline*` in every namespace except `kube-system`,
+  `kyverno`, `calico-system`, `tigera-operator`, each justified inline. Requires
+  a signature and a SLSA v1 provenance attestation, with three conditions on the
+  predicate content.
+- Rule 2 `deny-unsigned-in-enforced-namespaces` — in namespaces labelled
+  `provenancepipeline.io/admission: enforced`, **every** image must carry our
+  signature.
+
+Rule 2 is label-gated rather than cluster-wide, and that is a real limitation
+stated in the file: this cluster belongs to KateClusters and runs workloads from
+other pipelines in `app`, `observability`, `logging` and `falco`. A cluster-wide
+`imageReferences: ["*"]` would deny those on their next restart.
+
+`mutateDigest: false` with `verifyDigest: true`, so a tag is refused rather than
+silently resolved to whatever it currently points at.
+
+Verified — policy loaded `READY: True`, `VERIFY IMAGES: 2`:
+
+```
+########## 1 signed digest, enforced ns -> expect ADMIT
+pod/signed created
+########## 2 unsigned busybox, enforced ns -> expect DENY
+  deny-unsigned-in-enforced-namespaces: 'failed to verify image docker.io/library/busybox@sha256:9532d8c3…:
+    .attestors[0].entries[0].keyless: sigstore bundle verification failed: no matching signatures found'
+########## 3 our image by TAG -> expect DENY (no digest)
+  deny-unsigned-in-enforced-namespaces: missing digest for ghcr.io/pontope/provenancepipeline:latest
+  verify-own-images: missing digest for ghcr.io/pontope/provenancepipeline:latest
+########## 4 signed digest in default ns (rule 1 scope) -> expect ADMIT
+pod/signed-default created
+```
+
+And the admitted pod actually runs, so nothing was mutated into something broken:
+
+```
+$ kubectl -n provenance-demo get pods
+NAME     READY   STATUS    RESTARTS   AGE
+signed   1/1     Running   0          33s
+$ kubectl -n provenance-demo logs signed
+{"time":"2026-07-30T13:13:56Z","level":"INFO","msg":"listening","addr":":8080",
+ "version":"0.0.0-de7395b35bde7fd9d5f1f24020d9de0d6ab546b9",…}
+```
+
+Next: step 4 — `tests/`.

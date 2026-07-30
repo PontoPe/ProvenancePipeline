@@ -1,0 +1,182 @@
+# Admission control: refuse container images this pipeline did not produce.
+#
+# The trust anchor is the keyless signing identity. There is no key pair, so this
+# pair of strings IS the whole trust decision:
+#
+#   subject: https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main
+#   issuer:  https://token.actions.githubusercontent.com
+#
+# Both are pinned on every attestor. Neither alone is sufficient: the subject
+# alone is forgeable by any other OIDC issuer Fulcio will mint a certificate
+# for, and the issuer alone matches every GitHub Actions workflow that exists.
+# Both pins are load-bearing and were proven so — see docs/evidence/
+# admission-enforcement.md, where corrupting either one turns a passing
+# verification into a denial.
+#
+# Deliberately NOT `--certificate-identity-regexp` anchored on the repository
+# prefix. That accepts a signature from *any* workflow in the repository,
+# including one added by an attacker with push access. It was in the original
+# scaffold and was removed on purpose.
+#
+# `type: SigstoreBundle` rather than the default `Cosign`. This is forced by the
+# registry, not a preference — GHCR's referrers API returns HTTP 404 and no
+# legacy `.sig`/`.att` tags exist, because cosign 3.x writes only the new
+# Sigstore bundle format. Full reasoning and evidence in ADR-009.
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-provenance
+  annotations:
+    policies.kyverno.io/title: Verify image provenance
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: critical
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Refuses any image that does not carry a Sigstore signature and a SLSA v1
+      provenance attestation from this repository's release workflow. Runs in
+      Enforce with failurePolicy Fail: if Kyverno is unreachable the API server
+      rejects the pod rather than admitting it unchecked. That trades
+      availability for integrity on purpose — a fail-open admission webhook
+      proves nothing.
+spec:
+  # Fail, not Ignore. An admission controller that waves things through when it
+  # is down is indistinguishable from no admission controller, and this whole
+  # repository is sold on the denial actually happening.
+  webhookConfiguration:
+    failurePolicy: Fail
+  # Image verification reaches out to a registry and cannot run in background
+  # scans; Kyverno only evaluates these rules at admission.
+  background: false
+  rules:
+    # ---------------------------------------------------------------------
+    # Rule 1 — our own images must be provably ours, in every namespace.
+    #
+    # Scoped by image reference, so it cannot affect any workload that is not
+    # built by this pipeline. The namespace exclusions below are therefore
+    # mostly defensive; they are enumerated anyway, because an exclusion that
+    # is not written down is a hole nobody can audit.
+    # ---------------------------------------------------------------------
+    - name: verify-own-images
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                # kube-system — control-plane static pods and kube-proxy. A
+                # failing webhook here can make the cluster unrecoverable, and
+                # none of it is built by this pipeline. Pragmatic, and stated
+                # rather than hidden.
+                - kube-system
+                # kyverno — excluding the enforcer from its own policy. Without
+                # this, a Kyverno restart while Kyverno is down cannot schedule,
+                # which is an unrecoverable deadlock.
+                - kyverno
+                # calico-system, tigera-operator — CNI. If these cannot start,
+                # no pod gets an address, including Kyverno's.
+                - calico-system
+                - tigera-operator
+      verifyImages:
+        - type: SigstoreBundle
+          failureAction: Enforce
+          imageReferences:
+            - "ghcr.io/pontope/provenancepipeline*"
+          # Tags are refused outright rather than resolved. `mutateDigest: true`
+          # would rewrite a tag to whatever digest it points at right now, which
+          # trusts the tag at resolution time — the exact thing the signature
+          # model says not to do. Requiring the digest in the manifest means the
+          # author states what they meant to run.
+          mutateDigest: false
+          verifyDigest: true
+          required: true
+          attestors:
+            - count: 1
+              entries:
+                - keyless:
+                    subject: "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: "https://rekor.sigstore.dev"
+          attestations:
+            # A signature proves who pushed the bytes. It does not say where the
+            # bytes came from. Requiring the provenance predicate as well is
+            # what makes this supply-chain enforcement rather than a signature
+            # check.
+            - type: https://slsa.dev/provenance/v1
+              attestors:
+                - count: 1
+                  entries:
+                    - keyless:
+                        subject: "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                        issuer: "https://token.actions.githubusercontent.com"
+                        rekor:
+                          url: "https://rekor.sigstore.dev"
+              conditions:
+                - all:
+                    # Binds the provenance *content* to the same identity that
+                    # signed it. Without this a valid signature over someone
+                    # else's provenance document would pass: the attestor checks
+                    # who signed, this checks what they said.
+                    #
+                    # Condition keys are relative to the predicate, not the
+                    # in-toto statement — Kyverno makes the predicate the
+                    # context root, so this is `runDetails...`, never
+                    # `predicate.runDetails...`.
+                    - key: "{{ runDetails.builder.id }}"
+                      operator: Equals
+                      value: "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                    - key: "{{ buildDefinition.externalParameters.workflow.repository }}"
+                      operator: Equals
+                      value: "https://github.com/PontoPe/ProvenancePipeline"
+                    - key: "{{ buildDefinition.externalParameters.workflow.ref }}"
+                      operator: Equals
+                      value: "refs/heads/main"
+                    # buildType is deliberately NOT pinned. Two legitimate SLSA
+                    # v1 provenance documents exist for every image — one written
+                    # by `cosign attest`, one by actions/attest-build-provenance —
+                    # with different buildTypes. Pinning either would lock the
+                    # policy to whichever writer happens to be discoverable
+                    # through the registry's referrers behaviour. The three
+                    # conditions above hold for both. See ADR-009.
+
+    # ---------------------------------------------------------------------
+    # Rule 2 — deny-by-default: in an opted-in namespace, EVERY image must
+    # carry our signature, not just images from our repository.
+    #
+    # Opt-in by namespace label rather than cluster-wide. This is a real
+    # limitation and not a hidden one: this cluster belongs to the sibling
+    # KateClusters repo and runs workloads (app, observability, logging, falco)
+    # built by other pipelines. A cluster-wide `imageReferences: ["*"]` would
+    # deny those on their next restart, which is breaking someone else's
+    # cluster to make a point. Namespaces carrying
+    # `provenancepipeline.io/admission: enforced` get the full posture.
+    # ---------------------------------------------------------------------
+    - name: deny-unsigned-in-enforced-namespaces
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaceSelector:
+                matchLabels:
+                  provenancepipeline.io/admission: enforced
+      verifyImages:
+        - type: SigstoreBundle
+          failureAction: Enforce
+          imageReferences:
+            - "*"
+          mutateDigest: false
+          verifyDigest: true
+          required: true
+          attestors:
+            - count: 1
+              entries:
+                - keyless:
+                    subject: "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: "https://rekor.sigstore.dev"
