@@ -138,6 +138,14 @@ docs/img/demo.gif     # the money shot                     BUILT
 Everything the original scope asked for is done. What remains is one real
 weakness and two improvements.
 
+**Re-verified 2026-07-30T17:00-03:00, nothing changed:** repository `PUBLIC`,
+GHCR package `public`, latest `release` run green on `b04e72c`. The VM lease is
+free — KateClusters finished its release and emitted
+`AMBIENTE: kate LIBERADA` — so B5 is unblocked by environment and open only by
+choice. Across the portfolio this is the finished layer; the effort is in
+PontoAntiCrack, which is why B5 stays a documented residual risk rather than a
+priority.
+
 1. **Break the dependency on repository visibility (B5).** This is the only item
    that affects whether enforcement keeps working. `actions/attest-build-provenance`
    writes the one bundle Kyverno can see, and `release.yml:220` gates it on
