@@ -32,7 +32,7 @@ DIGEST ?=
 digest = $(if $(DIGEST),$(DIGEST),$(shell docker buildx imagetools inspect $(REF) --format '{{.Manifest.Digest}}'))
 
 .PHONY: help test build sbom scan run push sign attest verify verify-github evidence clean \
-        policy-install policy-test demo
+        policy-install policy-test demo demo-record
 
 help: ## show targets
 	@grep -hE '^[a-z][a-z-]*:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | column -t -s $$'\t'
@@ -113,3 +113,11 @@ policy-test: ## kyverno policy tests — allow and deny paths
 
 demo: ## the money shot — signed pod admitted, unsigned pod denied
 	./scripts/demo.sh
+
+# Records, audits the cast for leaked secrets, renders, and refuses to promote
+# anything that matches. Recipe and reasoning: docs/demo-recording.md
+demo-record: ## re-record docs/img/demo.gif from scripts/demo.sh
+	DEMO_SCRIPT=./scripts/demo.sh \
+	TITLE="ProvenancePipeline: a cluster refusing an unsigned image" \
+	OUT_DIR=docs/img NAME=demo \
+	./scripts/demo-record.sh

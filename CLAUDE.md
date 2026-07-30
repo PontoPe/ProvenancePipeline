@@ -12,11 +12,16 @@ Owner: Pedro (GitHub `PontoPe`). Repo: `github.com/PontoPe/ProvenancePipeline`, 
 
 ## Where things stand
 
-Last updated: 2026-07-29. **Full handoff: `docs/PROVEhandoff.md`** — read that if
-you are picking this up cold. How the CI half was built, start to finish:
-`docs/HANDBOOK.md`. Blow-by-blow of the last session: `docs/session-report.md`.
+Last updated: 2026-07-30. **Read `docs/PROGRESS.md` first** — it is the source of
+truth for what is done and verified cluster-side, including two things that were
+tried and abandoned, so you do not repeat them. Then `docs/PROVEhandoff.md` for
+the whole picture, `docs/HANDBOOK.md` for how the CI half was built, and
+`docs/session-report.md` for the blow-by-blow.
 
-Done — the CI half is built and verified on a real run:
+**Both halves are now built.** The cluster refuses unsigned images, in `Enforce`,
+and it is recorded in `docs/img/demo.gif`.
+
+Done — the CI half, verified on a real run:
 
 - `app/` — Go service, **stdlib only, no third-party modules** (deliberate, ADR-001). `app/main.go`, `app/main_test.go`, no `go.sum`.
 - `build/Dockerfile` — multi-stage, base images pinned by digest, distroless `:nonroot`, `-trimpath -buildid=`.
@@ -27,27 +32,48 @@ Done — the CI half is built and verified on a real run:
 - `docs/BLOCKED.md`, `docs/session-report.md`.
 - Green run: <https://github.com/PontoPe/ProvenancePipeline/actions/runs/30415086470>
 
-**The repo is now public** (owner made it public 2026-07-29). The GHCR package is still private — that stays the owner's call.
+**The repo is public and so is the GHCR package** (`visibility: public`, verified
+2026-07-30). B1 is therefore resolved — `cosign verify` needs no credential.
+
+Done — the cluster half, verified on `kate-node-01`:
+
+- `cluster/bootstrap/` — Kyverno v1.18.2 by kustomize. Upstream `install.yaml`
+  pinned by sha256 and **enforced** at fetch time; all five images digest-pinned;
+  `default-deny-all` plus four scoped allows for the `kyverno` namespace; PSA
+  `restricted`. ADR-008, ADR-010.
+- `policies/kyverno/verify-images.yaml` — `Enforce`, `failurePolicy: Fail`,
+  identity **and** issuer pinned, SLSA v1 provenance required.
+- `tests/` — `kyverno test tests/ --registry`, 9 assertions, green.
+- `docs/img/demo.gif` + `docs/evidence/admission-enforcement.md`.
+
+**ADR-005 was wrong and ADR-009 corrects it.** Kyverno can enforce **GitHub's**
+provenance attestation and **not** cosign's — the reverse of what was assumed.
+GHCR's referrers API 404s, the tag-fallback index only carries `artifactType` on
+GitHub's descriptor, and Kyverno filters on exactly that. Do not "fix" the policy
+to pin cosign's attestation; it was tested and it denies every image.
 
 Not done:
 
-- Everything cluster-side: `cluster/bootstrap`, `policies/kyverno`, `tests/`. Blocked on [KateClusters](../KateClusters), still not built.
-- The demo GIF. Blocked three ways — see `docs/BLOCKED.md` B3.
-- Local `make verify` — the workstation `gh` token lacks `read:packages`. B1.
-
-Order of remaining work:
-
-1. `cluster/bootstrap` — Kyverno install (needs KateClusters up).
-2. `policies/kyverno` — `verifyImages` in **Enforce**, issuer + subject pinned. Pin the **cosign** `slsaprovenance1` attestation, not GitHub's — Kyverno cannot verify GitHub's (ADR-005).
-3. `tests/` — policy tests covering both the allow and the deny path.
-4. Record the demo GIF: signed pod admitted, unsigned pod denied.
+- **B5, the important one.** Enforcement depends on the repo staying public,
+  because `actions/attest-build-provenance` is gated on visibility and writes the
+  only bundle Kyverno can see. Fix by pinning cosign 2.x in CI so the legacy
+  layout is published too. See `docs/BLOCKED.md` B5.
+- B2 — Docker Desktop still does not start unattended.
+- Scheduled re-scan of published digests for new CVEs.
 
 The exact identity to pin, everywhere:
 
 ```
 https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main
 https://token.actions.githubusercontent.com
-``` Be honest — overstating it is worse than a lower number.
+```
+
+State the SLSA level honestly: **Build L2, verified at admission.** Overstating it
+is worse than a lower number.
+
+Recording a demo for one of the sibling repos? `docs/demo-recording.md` is the
+recipe and `scripts/demo-record.sh` is the parameterised runner. Read the recipe
+before recording — several of its lessons cost a re-record here.
 
 ## Decisions already made — do not relitigate
 

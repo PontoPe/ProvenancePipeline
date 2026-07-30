@@ -96,7 +96,10 @@ short; append, never rewrite.
 
 ### ADR-005 — SLSA provenance is attested twice, deliberately
 
-- **Status:** accepted (2026-07-29)
+- **Status:** accepted (2026-07-29). **Decision stands; its central consequence
+  was wrong and is corrected by [ADR-009](#adr-009--the-cluster-enforces-githubs-provenance-not-cosigns).**
+  Attesting twice turned out to be what saved the project — but the reason given
+  below for *which* copy matters is backwards on GHCR.
 - **Context:** the scope called for `actions/attest-build-provenance`. On a
   user-owned private repository it fails outright:
   `Feature not available for user-owned private repositories.` More importantly,
@@ -146,6 +149,105 @@ short; append, never rewrite.
   someone downloaded and committed it — the run URL in the header is what makes
   that checkable.
 
+### ADR-008 — Kyverno's network policy ships in this repo, not in KateClusters
+
+- **Status:** accepted (2026-07-30)
+- **Context:** Kyverno needs egress to GHCR and to the Sigstore TUF endpoint to
+  verify anything, and ingress from the API server on 9443 or admission fails
+  closed. The cluster is owned by the sibling [KateClusters](../../KateClusters)
+  repo, which applies a `default-deny-all` NetworkPolicy to each namespace it
+  creates.
+- **What was actually found:** the prediction that a cluster-wide default-deny
+  would block Kyverno was **wrong**. There is no Calico `GlobalNetworkPolicy`
+  and the deny is per-namespace, so a newly created `kyverno` namespace started
+  with no NetworkPolicy at all — fully open, in both directions.
+- **Options:**
+  - Add the allow rules to KateClusters. Rejected: it makes a cluster repo carry
+    knowledge of an application repo's dependencies, and this session is not
+    permitted to write there anyway.
+  - Leave the namespace open, since nothing was blocking Kyverno. Rejected: it
+    would leave the enforcement plane as the one namespace on the cluster
+    exempt from the cluster's own posture, which is the opposite of the point.
+  - Ship `default-deny-all` plus scoped allows in `cluster/bootstrap/`.
+- **Decision:** the third. Whoever installs Kyverno owns Kyverno's network
+  requirements. Five policies: default-deny, DNS to `kube-system`, the API
+  server endpoint on 6443, TCP 443 to `0.0.0.0/0` minus RFC1918 for the registry
+  and Sigstore, and ingress on 9443 from the node address. Shape and exclusion
+  list copied from KateClusters' `falco/allow-falco-ruleset-fetch` so the two
+  repos read the same.
+- **Consequences:** a compromised Kyverno pod can reach the public internet on
+  443 and nothing on the LAN or in-cluster. The node address is hardcoded, which
+  is honest for a known single-node cluster and must be widened to the
+  control-plane subnet for a multi-node one. KateClusters should reference this
+  policy so the two do not drift; that is recorded in the session report rather
+  than done, because writing to the sibling repo was out of scope.
+
+### ADR-009 — The cluster enforces GitHub's provenance, not cosign's
+
+- **Status:** accepted (2026-07-30). Corrects the consequence stated in ADR-005.
+- **Context:** ADR-005 concluded that the `cosign attest --type slsaprovenance1`
+  copy is "the copy the future admission policy will pin", because Kyverno
+  speaks cosign and cannot call `gh attestation verify`. Written before there
+  was a cluster to test it on, that turned out to be exactly backwards.
+- **What the registry actually contains:** four Sigstore bundles per image, each
+  with a manifest-level `artifactType` of
+  `application/vnd.dev.sigstore.bundle.v0.3+json` — `cosign sign`, the SBOM
+  attestation, cosign's SLSA provenance, and
+  `actions/attest-build-provenance`'s SLSA provenance. There are no legacy
+  `.sig`/`.att` tags, because cosign 3.x writes only the new bundle format.
+- **Why Kyverno sees one of the four:** GHCR's referrers API answers **HTTP
+  404**, so go-containerregistry falls back to the `sha256-<digest>` tag index.
+  In that index only GitHub's descriptor carries `artifactType`; the three
+  written by cosign carry `application/vnd.oci.empty.v1+json`, their config
+  media type. Kyverno's `fetchBundles` skips any descriptor without the
+  `application/vnd.dev.sigstore.bundle` prefix, so exactly one bundle survives
+  the filter — GitHub's. `cosign verify-attestation` returns all four, because
+  it reads each referrer manifest rather than trusting the index descriptors.
+  That asymmetry is the whole finding.
+- **Options:**
+  - Publish the legacy layout as well, so `type: Cosign` has something to read.
+    **Not available.** `cosign sign --help` on 3.1.2 offers `--bundle`,
+    `--registry-referrers-mode=legacy|oci-1-1` and `--signing-config`, and no
+    `--new-bundle-format`. cosign 3 removed the legacy writer; the only lever
+    left is downgrading cosign in CI, which was not done this session.
+  - Pin `buildDefinition.buildType` to GitHub's value. Works today, and locks
+    the policy to whichever writer the registry happens to expose.
+  - Require a SLSA v1 provenance attestation signed by the pinned identity, and
+    assert only on fields both documents agree about.
+- **Decision:** the third. The policy pins `runDetails.builder.id`,
+  `buildDefinition.externalParameters.workflow.repository` and `.ref` — identical
+  in both predicates — and deliberately does not pin `buildType`. Verified
+  empirically: pinning GitHub's buildType admits, pinning cosign's denies.
+- **Consequences:** enforcement works today and would keep working unchanged if
+  cosign's bundle ever became discoverable, so this is not a bet on one writer.
+  The uncomfortable part is that `actions/attest-build-provenance` is now
+  load-bearing while `.github/workflows/release.yml` still gates it on
+  `if: steps.meta.outputs.private != 'true'` — **if the repository is made
+  private again, new images carry no enforceable provenance and this policy
+  denies every one of them.** Recorded as B5. ADR-005's decision to attest twice
+  is vindicated; only its explanation of which copy mattered was wrong.
+
+### ADR-010 — The enforcement plane is installed the way this repo demands of everything else
+
+- **Status:** accepted (2026-07-30)
+- **Context:** the usual Kyverno install is `kubectl apply -f` against a release
+  URL, or a Helm chart pulling images by tag. A repository whose entire argument
+  is "verify provenance before you run it" cannot bootstrap its own admission
+  controller that way without undermining itself.
+- **Decision:** `cluster/bootstrap/fetch-upstream.sh` downloads the pinned
+  v1.18.2 `install.yaml` and **enforces** a sha256 from `upstream.sha256`,
+  refusing to install on mismatch. All five controller images are pinned by
+  digest through the kustomize `images` transformer. The manifest itself is not
+  committed — 5.7 MB of generated CRDs — but the hash is, which is the part that
+  carries the guarantee. The `kyverno` CLI used for the tests was installed by
+  verifying `checksums.txt` with `cosign verify-blob` against Kyverno's pinned
+  release identity, then hashing the tarball against that.
+- **Consequences:** `kubectl apply -k cluster/bootstrap` alone no longer works;
+  the fetch has to run first, and `make policy-install` does it. A re-cut
+  upstream release fails the install loudly instead of silently changing what
+  gets deployed. `--server-side` is required because Kyverno's CRDs exceed the
+  262144-byte limit on the annotation a client-side apply writes.
+
 ## Component detail
 
 | Component | Responsibility | Notes |
@@ -155,7 +257,10 @@ short; append, never rewrite.
 | `.github/workflows/release.yml` | Build → SBOM → gate → sign → attest → verify | Actions pinned by commit SHA |
 | `scripts/collect-evidence.sh` | Local regeneration of the evidence file | Needs registry read; see BLOCKED.md B1 |
 | `Makefile` | Local equivalents of every CI step | POSIX; run from Git Bash or WSL |
-| `policies/kyverno/` | `verifyImages` enforcement | Not written — blocked on a cluster |
+| `cluster/bootstrap/` | Kyverno install + its network policy | Upstream sha256-enforced, images digest-pinned (ADR-010, ADR-008) |
+| `policies/kyverno/` | `verifyImages` enforcement | `Enforce`, `failurePolicy: Fail`, `type: SigstoreBundle` (ADR-009) |
+| `tests/` | Policy tests, allow and deny | `kyverno test tests/ --registry` |
+| `scripts/demo.sh` | The four admission cases | Recorded as `docs/img/demo.gif`, captured as evidence |
 
 ## Open questions
 

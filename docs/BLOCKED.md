@@ -3,11 +3,43 @@
 Things attempted in earnest and not finished, with the exact error and what
 would unblock them. Kept so the next session does not rediscover them.
 
-Last updated: 2026-07-29.
+Last updated: 2026-07-30.
+
+| ID | State |
+|----|-------|
+| B1 | **resolved** — the GHCR package is public; no `read:packages` needed |
+| B2 | open — Docker Desktop's Linux engine never comes up unattended |
+| B3 | **resolved** — the demo is recorded, from the cluster, not from a local build |
+| B4 | resolved 2026-07-29 |
+| B5 | **open, and it matters** — enforcement depends on the repo staying public |
 
 ---
 
 ## B1 — `cosign verify` cannot run against GHCR from the workstation
+
+**RESOLVED 2026-07-30.** The package is public, so no registry credential is
+needed at all. Verified from the cluster node, which has never been logged in to
+any registry:
+
+```console
+$ gh api user/packages/container/provenancepipeline --jq .visibility
+public
+
+$ cosign verify --certificate-identity "$ID" --certificate-oidc-issuer "$ISSUER" \
+    ghcr.io/pontope/provenancepipeline@sha256:5d4b03ea…
+Verification for ghcr.io/pontope/provenancepipeline@sha256:5d4b03ea… --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The code-signing certificate was verified using trusted certificate authority certificates
+```
+
+`gh auth refresh -s read:packages` is no longer required for `make verify`. The
+original write-up is kept below because the failure mode is worth recognising if
+the package is ever made private again — which is also B5.
+
+<details>
+<summary>Original B1, when the package was private</summary>
 
 **Wanted:** `make verify` executed locally, against the published digest.
 
@@ -50,6 +82,8 @@ that run's real output. The transparency-log half *was* verified locally
 against public Rekor, which needs no registry credentials — see the last
 section of the evidence file.
 
+</details>
+
 ---
 
 ## B2 — no local Docker daemon this session
@@ -86,6 +120,27 @@ and `make test` both run.
 
 ## B3 — demo GIF not recorded
 
+**RESOLVED 2026-07-30.** `docs/img/demo.gif` exists. All three blockers below
+dissolved the same way: the demo was recorded **on the cluster node**, not on the
+Windows workstation, so Docker Desktop and WSL never entered into it, and no
+local signing was needed because the images were already signed by CI. The
+recording shows the thing that actually matters — a pod being denied.
+
+Recorded with `asciinema rec --command`, converted with `agg`. Three snags worth
+knowing:
+
+- `sudo -v` inside the recorded command hangs forever under `ssh -tt`. sudo is
+  NOPASSWD on this node; drop it.
+- `agg` fails on a headless VM with `Error: no faces matching font family
+  options` until `fonts-dejavu-core` is installed, and still needs
+  `--font-family "DejaVu Sans Mono"` passed explicitly.
+- The first render came out 10 s long with 60 ms frames, which is unreadable.
+  `--speed 0.6 --idle-time-limit 5 --last-frame-duration 6` gives 31 s. Check the
+  per-frame durations rather than trusting the output.
+
+<details>
+<summary>Original B3</summary>
+
 **Wanted:** `docs/img/demo.gif` via `asciinema` + `agg`.
 
 **Not done because:** three independent blockers, not one.
@@ -105,6 +160,8 @@ the browser flow. Better: wait for the cluster and record the demo that
 actually matters — a pod being *denied* — rather than a local re-run of what
 CI already proves. That is roadmap items 4–6.
 
+</details>
+
 ---
 
 ## B4 — `actions/attest-build-provenance` refused a private repository
@@ -122,5 +179,63 @@ The repository was made public by the owner mid-session and the step now runs
 and is verified. The workflow still gates it on the repository's real
 visibility, so it degrades cleanly rather than failing if that is ever
 reverted. The cosign `slsaprovenance1` attestation was added in response and
-is kept permanently — it is the copy Kyverno can verify, and it does not
-depend on repository visibility. See ADR-005.
+is kept permanently.
+
+> **Correction, 2026-07-30.** The last sentence of this entry used to read "it is
+> the copy Kyverno can verify, and it does not depend on repository visibility."
+> That is false. On GHCR, Kyverno can discover **only** GitHub's bundle, so the
+> visibility gate above is the thing enforcement now depends on. See ADR-009 and
+> B5. "Degrades cleanly" was true of the CI run and is not true of the cluster.
+
+---
+
+## B5 — enforcement silently depends on the repository staying public
+
+**Open. This is the one to fix next.**
+
+Kyverno can only discover one of the four Sigstore bundles attached to each
+image, and it is the one written by `actions/attest-build-provenance` — see
+ADR-009 for the mechanism. That step is gated on repository visibility:
+
+```yaml
+# .github/workflows/release.yml:220
+- name: Attest build provenance (GitHub)
+  if: steps.meta.outputs.private != 'true'
+  uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+```
+
+The gate is correct in itself — GitHub's attestations API genuinely refuses
+user-owned private repositories, which is B4. The problem is what it now
+implies: **if the repository is made private again, every image built after that
+point carries no attestation Kyverno can see, and `verify-provenance` denies all
+of them.** The failure is not subtle, but it is entirely non-obvious from
+reading either file alone, and it couples an admission-control outcome to a
+GitHub repository setting.
+
+**Not fixed this session because** the fix is a CI change plus a release run plus
+re-verification, and the honest sequencing was to land working enforcement and
+document the coupling rather than start a second, larger change on top of an
+unverified one.
+
+**Options, in the order they should be tried:**
+
+1. **Pin cosign to 2.x in CI.** cosign 2.x defaults to the legacy
+   `sha256-<digest>.sig` / `.att` layout, which Kyverno reads through its
+   default `type: Cosign` path with no referrers API involved. That restores
+   ADR-005's original intent — enforcing cosign's own attestation — and removes
+   the dependency on GitHub's step entirely. Verify the flag names against
+   `cosign sign --help` for whichever 2.x is chosen rather than assuming;
+   3.1.2 has no `--new-bundle-format`, and 2.x's default is what matters here.
+2. **Report it upstream.** cosign writes the fallback-tag referrers index with
+   `artifactType` set to the config media type rather than the manifest's own
+   `artifactType`, which is what makes its bundles undiscoverable to any
+   consumer using `remote.Referrers`. GitHub's writer gets it right in the same
+   index, so the two are directly comparable in one artifact.
+3. **Fail loudly instead of silently.** At minimum, make the workflow fail the
+   run when the attestation step is skipped, rather than producing an image that
+   will be refused at admission for reasons nobody will connect to a visibility
+   toggle three weeks earlier.
+
+**Do not** "fix" this by relaxing the policy. Dropping the attestation
+requirement, or moving the rule to `Audit`, would make the symptom disappear and
+the guarantee with it.
