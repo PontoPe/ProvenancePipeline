@@ -291,3 +291,37 @@ annotation limit that a client-side apply writes), and `policy-test` passes
 `--registry`.
 
 Next: step 5 — evidence file and the demo recording.
+
+---
+
+## Step 5 — evidence file and demo recording — DONE
+
+- `scripts/demo.sh` — the four admission cases plus `cosign verify-attestation`.
+- `scripts/collect-admission-evidence.sh` — runs `demo.sh` and wraps its verbatim
+  stdout into `docs/evidence/admission-enforcement.md`. ADR-007 says evidence is
+  generated, never transcribed; there is no cluster in CI, so the equivalent
+  guarantee is that the evidence file and the recorded GIF are the same script.
+- `docs/img/demo.gif` — 957x987, 31 s, 494 KB. `docs/img/demo.cast` is committed
+  alongside it so the GIF can be re-rendered without re-running the cluster.
+
+Recorded with `asciinema rec --command`, converted with
+`agg --font-family "DejaVu Sans Mono" --idle-time-limit 5 --speed 0.6 --last-frame-duration 6`.
+
+Two things that cost time, for whoever does this next:
+
+- `sudo -v` inside the recorded command hangs forever under `ssh -tt`. sudo is
+  NOPASSWD on this node, so just drop it.
+- `agg` fails on the headless VM with `Error: no faces matching font family
+  options` until `fonts-dejavu-core` is installed, and then still needs
+  `--font-family "DejaVu Sans Mono"` passed explicitly.
+- The first render was 10 s total with 60 ms frames — unreadable. The
+  `--speed`/`--idle-time-limit`/`--last-frame-duration` values above are what
+  make it legible; check the per-frame durations rather than assuming.
+
+Also resolved incidentally: **B1 is gone.** `cosign verify` and
+`cosign verify-attestation` both succeed from the node with no registry
+credentials at all, because the GHCR package is public
+(`gh api user/packages/container/provenancepipeline --jq .visibility` → `public`,
+103 versions). No `read:packages` scope is needed any more.
+
+Next: step 6 — README, ADRs, handoff, session report.
