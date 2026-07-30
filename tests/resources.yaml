@@ -1,0 +1,76 @@
+# Test fixtures for policies/kyverno/verify-images.yaml.
+#
+# These are deliberately real, pullable references rather than placeholders. The
+# tests run with `kyverno test --registry`, so every case below performs a real
+# registry lookup and a real Sigstore verification against the public Rekor log.
+# A fixture pointing at an image that does not exist would prove nothing except
+# that the fetch failed.
+---
+# Our image, by digest, signed by the release workflow. Must be admitted.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: signed-digest
+  namespace: provenance-demo
+spec:
+  containers:
+    - name: app
+      image: ghcr.io/pontope/provenancepipeline@sha256:5d4b03eae45558381b0236be7cacf0cf67d33a3711fb50ec8ab84a0efc692ea4
+---
+# Same image, same signature, but in a namespace that has not opted in to
+# rule 2. Rule 1 still applies because rule 1 is scoped by image reference, not
+# by namespace. Must be admitted.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: signed-digest-other-namespace
+  namespace: default
+spec:
+  containers:
+    - name: app
+      image: ghcr.io/pontope/provenancepipeline@sha256:5d4b03eae45558381b0236be7cacf0cf67d33a3711fb50ec8ab84a0efc692ea4
+#
+# There is no tag-reference fixture here. It is denied on the live cluster but
+# produces two disagreeing rule responses that `kyverno test` cannot express —
+# see the note at the top of kyverno-test.yaml and the evidence file.
+---
+# A perfectly ordinary public image that carries no signature from our identity.
+# In an enforced namespace it must be denied. This is the case the whole
+# repository exists to demonstrate.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: unsigned-third-party
+  namespace: provenance-demo
+spec:
+  containers:
+    - name: app
+      image: docker.io/library/busybox@sha256:9532d8c39891ca2ecde4d30d7710e01fb739c87a8b9299685c63704296b16028
+---
+# The same unsigned image in a namespace that has NOT opted in. Rule 2 must not
+# match it and rule 1 must not either, because the image is not ours. This
+# fixture exists to prove the label gate is a real boundary rather than
+# decoration — if this ever starts failing, rule 2 has escaped its scope and is
+# about to break the workloads this cluster runs for the sibling repo.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: unsigned-third-party-unenforced-namespace
+  namespace: default
+spec:
+  containers:
+    - name: app
+      image: docker.io/library/busybox@sha256:9532d8c39891ca2ecde4d30d7710e01fb739c87a8b9299685c63704296b16028
+---
+# Genuinely Sigstore-signed, by a real keyless identity that is not ours: the
+# Kyverno release workflow. Proves the policy checks *whose* signature it is,
+# not merely that a signature exists. Must be denied.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: signed-by-another-identity
+  namespace: provenance-demo
+spec:
+  containers:
+    - name: app
+      image: reg.kyverno.io/kyverno/kyverno@sha256:0a540e2ddf74d0d2d3d45f9ef248d7dbc96576accdbcc6a2dd7eaff9fea56504

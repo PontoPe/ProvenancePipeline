@@ -245,3 +245,49 @@ $ kubectl -n provenance-demo logs signed
 ```
 
 Next: step 4 — `tests/`.
+
+---
+
+## Step 4 — `tests/` — DONE, verified
+
+`kyverno test tests/ --registry`, 9 assertions, all green. `--registry` is not
+optional: without it the CLI cannot fetch signatures and every case degrades to
+an error, so a suite that passes without it has verified nothing. The Makefile
+target passes it.
+
+```
+│ 1 │ verify-provenance │ verify-own-images                    │ v1/Pod/provenance-demo/signed-digest                     │ Pass │ Ok       │
+│ 3 │ verify-provenance │ verify-own-images                    │ v1/Pod/default/signed-digest-other-namespace             │ Pass │ Ok       │
+│ 5 │ verify-provenance │ deny-unsigned-in-enforced-namespaces │ v1/Pod/provenance-demo/unsigned-third-party              │ Pass │ Ok       │
+│ 7 │ verify-provenance │ deny-unsigned-in-enforced-namespaces │ v1/Pod/provenance-demo/signed-by-another-identity        │ Pass │ Ok       │
+│ 9 │ verify-provenance │ deny-unsigned-in-enforced-namespaces │ v1/Pod/default/unsigned-third-party-unenforced-namespace │ Pass │ Excluded │
+
+Test Summary: 9 tests passed and 0 tests failed
+```
+
+Tooling installed on the node, both verified before use rather than curl-to-bash:
+
+- `cosign` v3.1.2, sha256 checked against the release `cosign_checksums.txt`.
+- `kyverno` CLI v1.18.2 — `cosign verify-blob --bundle checksums.txt.sigstore.json`
+  with identity pinned to
+  `https://github.com/kyverno/kyverno/.github/workflows/release.yaml@refs/tags/v1.18.2`
+  and issuer `https://token.actions.githubusercontent.com` → `Verified OK`, then
+  the tarball hashed against that now-trusted checksums file.
+
+### Attempt made and abandoned — do not repeat
+
+Testing the tag-reference denial through `kyverno test`. The rule emits two
+responses for that resource, `pass` for the signature over the digest `:latest`
+resolves to and `fail` for the missing digest, and the CLI compares each
+declared result against *every* response. One declaration gives
+`Want fail, got pass`; declaring both gives two mismatches. There is no way to
+express it. The case is real and denied on the live cluster, so it is proved in
+`docs/evidence/admission-enforcement.md` instead and the gap is stated at the
+top of `tests/kyverno-test.yaml`. Do not reshape the fixture to make it green.
+
+Makefile updated: `policy-install` now runs the checksum-verified fetch and uses
+`--server-side` (Kyverno's CRDs exceed the 262144-byte last-applied-configuration
+annotation limit that a client-side apply writes), and `policy-test` passes
+`--registry`.
+
+Next: step 5 — evidence file and the demo recording.

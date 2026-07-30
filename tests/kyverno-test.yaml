@@ -1,0 +1,75 @@
+# Policy tests for the admission half of this pipeline.
+#
+# Run with:  kyverno test tests/ --registry
+#
+# `--registry` is not optional. Without it the CLI cannot fetch signatures and
+# every case degrades into an error, so a suite that passes without it is
+# testing nothing. The `make policy-test` target passes it.
+#
+# Five cases: two that must be admitted, two that must be denied, one that must
+# not be matched at all. A suite that only proves admission works would be worth
+# very little here — the claim this repository makes is about the denial.
+#
+# One case is deliberately absent: our own image referenced by TAG instead of
+# digest. It is denied on the live cluster —
+#
+#   verify-own-images: missing digest for ghcr.io/pontope/provenancepipeline:latest
+#
+# — but it cannot be expressed here. The rule emits two responses for it, a
+# `pass` for the signature over the digest the tag currently resolves to and a
+# `fail` for the missing digest, and `kyverno test` compares each declared
+# result against every response, so no single declaration can be satisfied and
+# declaring both makes two mismatches instead of one. Rather than reshape the
+# fixture until the suite goes green, that case is proved against the real
+# cluster and recorded in docs/evidence/admission-enforcement.md.
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: verify-provenance
+policies:
+  - ../policies/kyverno/verify-images.yaml
+resources:
+  - resources.yaml
+variables: values.yaml
+results:
+  # --- must be admitted -------------------------------------------------
+  - policy: verify-provenance
+    rule: verify-own-images
+    resources:
+      - provenance-demo/signed-digest
+    kind: Pod
+    result: pass
+
+  - policy: verify-provenance
+    rule: verify-own-images
+    resources:
+      - default/signed-digest-other-namespace
+    kind: Pod
+    result: pass
+
+  # --- must be denied ---------------------------------------------------
+  # No signature from our identity at all.
+  - policy: verify-provenance
+    rule: deny-unsigned-in-enforced-namespaces
+    resources:
+      - provenance-demo/unsigned-third-party
+    kind: Pod
+    result: fail
+
+  # Really signed, really in Rekor, wrong identity.
+  - policy: verify-provenance
+    rule: deny-unsigned-in-enforced-namespaces
+    resources:
+      - provenance-demo/signed-by-another-identity
+    kind: Pod
+    result: fail
+
+  # --- must not be matched ----------------------------------------------
+  # The label gate holds: an unsigned third-party image outside an enforced
+  # namespace is none of rule 2's business.
+  - policy: verify-provenance
+    rule: deny-unsigned-in-enforced-namespaces
+    resources:
+      - default/unsigned-third-party-unenforced-namespace
+    kind: Pod
+    result: skip

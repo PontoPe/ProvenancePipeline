@@ -94,14 +94,22 @@ evidence: ## regenerate docs/evidence from a live verification run
 clean:
 	rm -f sbom.*.json provenance.json
 
-# --- admission control: blocked on a cluster (KateClusters), see README roadmap ---
+# --- admission control ---
 
+# --server-side is required, not cosmetic: Kyverno's CRDs exceed the 262144-byte
+# limit on the last-applied-configuration annotation that a client-side apply
+# writes.
 policy-install: ## install Kyverno + the verifyImages policy
-	kubectl apply -k cluster/bootstrap
+	./cluster/bootstrap/fetch-upstream.sh
+	kubectl apply -k cluster/bootstrap --server-side
+	kubectl -n kyverno rollout status deploy/kyverno-admission-controller --timeout=300s
 	kubectl apply -f policies/kyverno/
 
-policy-test: ## kyverno policy unit tests
-	kyverno test tests/
+# --registry is required. Without it the CLI cannot fetch signatures from the
+# registry and every case degrades into an error, so a suite that passes without
+# it has verified nothing.
+policy-test: ## kyverno policy tests — allow and deny paths
+	kyverno test tests/ --registry
 
 demo: ## the money shot — signed pod admitted, unsigned pod denied
 	./scripts/demo.sh

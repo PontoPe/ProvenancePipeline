@@ -1,0 +1,17 @@
+# Namespace labels the CLI cannot read from a live cluster during `kyverno test`.
+# Rule 2 matches on a namespaceSelector, so without this the enforced namespace
+# would look unlabelled and every rule-2 case would silently report `skip` —
+# which would make the deny tests pass for the wrong reason.
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Value
+metadata:
+  name: values
+namespaceSelector:
+  - name: provenance-demo
+    labels:
+      provenancepipeline.io/admission: enforced
+  # `default` is listed with no opt-in label on purpose: it is what makes the
+  # "rule 2 must not match here" cases meaningful.
+  - name: default
+    labels:
+      kubernetes.io/metadata.name: default
