@@ -344,7 +344,7 @@ Next: step 6 — README, ADRs, handoff, session report.
 - `docs/BLOCKED.md` — B1 and B3 resolved with the resolving output pasted in,
   originals kept collapsed, **B5 added**, and the false claim in B4 corrected in
   place instead of quietly deleted.
-- `docs/PROVEhandoff.md`, `CLAUDE.md` — current state, the corrected §3, cluster
+- `docs/PROVEhandoff.md`, `AGENTS.md` — current state, the corrected §3, cluster
   gotchas.
 - `docs/session-report.md` — this session. The previous one is now
   `docs/session-report-2026-07-29.md`.

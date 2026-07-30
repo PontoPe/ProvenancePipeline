@@ -120,7 +120,7 @@ real run:
   the application source is in `app/`, so the build context would not have
   contained the code. Context is now the repo root with an explicit `file:`.
 - **Actions pinned by tag** (`actions/checkout@v4`, `cosign-installer@v3`,
-  and so on) — directly contradicting the convention in `CLAUDE.md`, in the repo
+  and so on) — directly contradicting the convention in `AGENTS.md`, in the repo
   whose whole argument is that mutable references are the problem. All now
   pinned by commit SHA.
 - **`cosign triangulate --type digest $(REF)`** in the Makefile's `sign` target.

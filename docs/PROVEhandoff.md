@@ -2,7 +2,7 @@
 
 Written 2026-07-29, updated 2026-07-30 when the cluster half landed. Assumes you
 know containers and CI but nothing about this repo. Read this first, then
-`docs/PROGRESS.md` for the cluster-side detail and `CLAUDE.md` for conventions.
+`docs/PROGRESS.md` for the cluster-side detail and `AGENTS.md` for conventions.
 
 > **What changed on 2026-07-30.** The cluster exists, Kyverno enforces, and the
 > demo is recorded. One assumption in this document turned out to be **wrong in
@@ -77,10 +77,6 @@ own image referenced by tag instead of digest.
 Cluster: `kate-node-01`, kubeadm v1.34.10, Debian 13, Calico, single node,
 `192.168.100.127`, reachable as `ssh kate`. VMware snapshot `pre-kyverno` exists.
 `vmrun.exe` is under `C:\Program Files\VMware\`, **not** `Program Files (x86)`.
-
-### Still not built
-
-`policies/verify/` — superseded by the Makefile, and should probably be deleted.
 
 ## 3. The one string everything pins
 
@@ -160,8 +156,8 @@ weakness and two improvements.
    therefore static, so a new CVE against a shipped image surfaces only on a
    rebuild. A scheduled `grype` run against the published digest closes that.
 
-Housekeeping: delete `policies/verify/`, and consider `kubectl wait` instead of
-the `sleep 6` in `scripts/demo.sh`.
+Housekeeping: consider `kubectl wait` instead of the `sleep 6` in
+`scripts/demo.sh`.
 
 ## 6. Blockers you will hit
 
@@ -177,7 +173,7 @@ Full detail with exact error strings in [BLOCKED.md](BLOCKED.md). Summary:
 
 ## 7. Decisions that are settled — do not relitigate
 
-From `CLAUDE.md`, still binding: keyless signing (no key pair), Kyverno over
+From `AGENTS.md`, still binding: keyless signing (no key pair), Kyverno over
 Gatekeeper, `Enforce` + `failurePolicy: Fail`, GHCR, digests pinned and tags
 never trusted, `grype` gate at CRITICAL.
 
@@ -273,7 +269,7 @@ Windows 11, PowerShell 7. These cost time already:
 5. [docs/threat-model.md](threat-model.md) — T1..T9
 6. [docs/session-report.md](session-report.md) — what happened 2026-07-30, including the ADR-005 correction
 7. [docs/BLOCKED.md](BLOCKED.md) — exact errors, exact fixes
-8. [CLAUDE.md](../CLAUDE.md) — per-session context for Claude Code
+8. [AGENTS.md](../AGENTS.md) — canonical instructions for coding agents
 9. [docs/PROGRESS.md](PROGRESS.md) — cluster-side, step by step, including two
    things tried and abandoned so they are not retried
 10. [docs/demo-recording.md](demo-recording.md) — the recording recipe, written
