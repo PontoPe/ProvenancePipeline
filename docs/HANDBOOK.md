@@ -417,11 +417,19 @@ in the *same job* that builds the image, so anything compromising that job can
 write its own provenance and have it signed. Closing it means delegating to
 `slsa-framework/slsa-github-generator`, which generates in an isolated context.
 
-And the framing the whole project lives or dies on: **this repo now proves
-verifiable provenance. It does not yet prove enforcement.** The rejection — a
-cluster refusing an unsigned image — is still the missing deliverable, and it is
-the one the project is sold on. Everything built this session is the
-prerequisite for it, not a substitute.
+And the framing the whole project lives or dies on: **verifiable provenance is
+not enforcement.** That was written when the rejection was still the missing
+deliverable. It arrived the next day: a Kyverno cluster in `Enforce` admitting
+one signed image and refusing three unsigned paths, recorded in the demo. Read
+`PROVEhandoff.md` for the state and ADR-009 for the correction it forced —
+on GHCR the copy Kyverno can discover is GitHub's attestation, not cosign's,
+which is the reverse of what §3 and ADR-005 originally assumed.
+
+The residual is B5 and it is a coupling rather than a gap: the GitHub
+attestation step is gated on the repository being public, so making it private
+again denies every new image at admission. Pinning cosign 2.x publishes the
+legacy layout as well and breaks that dependency. It is documented, optional,
+and deliberately not urgent.
 
 ---
 
