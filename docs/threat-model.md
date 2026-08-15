@@ -4,6 +4,8 @@
 
 The path from source commit to a running container: CI build, SBOM, scan, signing, attestation, registry, and admission control. The application's own logic is out of scope; the cluster's runtime hardening lives in [KateClusters](../../KateClusters).
 
+**Program-level threats live in [TrustStack/docs/threat-model.md](../../TrustStack/docs/threat-model.md).** Three things below understate their blast radius when read from inside this repository alone. This repo authors the enforcement policy but does not own the cluster it runs in, so **nothing anywhere asserts the live `ClusterPolicy` still exists** — deleting it leaves every gate in the program green (X1). T9's failure lands in a *different* repository than the setting that triggers it (X2). And T4 is right that keyless signing leaves no key to steal, but the GitHub account it replaces the key with is the same one that applies Terraform to a live AWS organization — and image signing is gated on a push to `main` while Terraform apply is gated on a protected environment (X6).
+
 ## Assets
 
 | Asset | Why it matters |
