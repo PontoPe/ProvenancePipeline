@@ -1,4 +1,12 @@
-# B5 investigation — 2026-11-17 (partial; publication blocked)
+# B5 investigation — 2026-11-17 (partial; B5 unresolved)
+
+> Handoff update: the operator refreshed GitHub authorization while this worker
+> was closing its initial blocked run. The worker then rechecked that `workflow`
+> scope was present and successfully pushed `fix/b5-own-proof`, read back at
+> `5fc6492876ffadb898fe94a9165a67a9aad96197` before this documentation update.
+> The initial push failure below is historical evidence, no longer an active
+> credential blocker. The card needs reactivation by the orchestrator to resume
+> the remaining implementation, live matrix and release review; no completion is claimed.
 
 B5 remains **open**. No own-proof-only image was published, no required release
 publication gate was enabled, and no new exact-head CI run or PR exists. The

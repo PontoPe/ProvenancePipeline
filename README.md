@@ -13,7 +13,8 @@ Software supply-chain pipeline: build → SBOM → vulnerability scan → keyles
 > local publication-content and policy-spec contracts, not live enforcement.
 > [Reproduction, results and compatibility experiment](docs/offline-verification.md).
 > B5 remains open. The admission policy is unchanged; a patched Cosign pin is
-> prepared locally but publication is blocked by GitHub authorization.
+> prepared on `fix/b5-own-proof`. GitHub authorization was refreshed after the
+> initial rejected push; B5 implementation and live acceptance remain pending.
 > [Live investigation and unresolved findings](docs/evidence/b5-investigation-2026-11-17.md).
 
 ---

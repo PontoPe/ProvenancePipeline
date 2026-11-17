@@ -194,9 +194,10 @@ is kept permanently.
 **Open. This is the one to fix next.**
 
 **2026-11-17 live follow-up:** baseline and negative admissions revalidated in a
-resource-limited disposable cluster, then cleaned up. Own-proof publication is
-blocked: GitHub rejected the actual workflow-changing branch push because the
-OAuth grant lacks `workflow` scope. No own-only consumer proof or new release
+resource-limited disposable cluster, then cleaned up. GitHub initially rejected
+the workflow-changing branch push for missing `workflow` scope; the operator
+subsequently refreshed authorization and the worker verified a successful push.
+Own-proof-only publication and consumer proof remain pending. No own-only consumer proof or new release
 gate exists. The baseline also exposed scale-zero admission and defaulted-export
 drift-check limitations. See [investigation and raw evidence](evidence/b5-investigation-2026-11-17.md).
 

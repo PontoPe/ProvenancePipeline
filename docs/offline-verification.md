@@ -2,9 +2,9 @@
 
 > Historical offline milestone below. A subsequent authorized live baseline run
 > is recorded in [the 2026-11-17 investigation](evidence/b5-investigation-2026-11-17.md).
-> The suite now has 13 tests; a local patched Cosign workflow pin is prepared,
-> but GitHub rejected publication for missing workflow authorization. B5 remains
-> open. Do not read this milestone's original no-network boundary as describing
+> The suite now has 13 tests; a patched Cosign workflow pin is prepared on a
+> branch. An initial missing-workflow-scope push failure was subsequently resolved
+> by the operator's authorization refresh. B5 remains open. Do not read this milestone's original no-network boundary as describing
 > the later live run.
 
 ## Outcome and boundary
