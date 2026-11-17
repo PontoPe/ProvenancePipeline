@@ -1,4 +1,5 @@
 SHELL := /bin/bash
+.DEFAULT_GOAL := help
 .SHELLFLAGS := -eu -o pipefail -c
 
 # Run from Git Bash or WSL on the Windows workstation — this is a POSIX Makefile.
@@ -32,7 +33,15 @@ DIGEST ?=
 digest = $(if $(DIGEST),$(DIGEST),$(shell docker buildx imagetools inspect $(REF) --format '{{.Manifest.Digest}}'))
 
 .PHONY: help test build sbom scan run push sign attest verify verify-github evidence clean \
-        policy-install policy-test demo demo-record
+        policy-install policy-test demo demo-record offline-test offline-policy-check
+
+PYTHON ?= python3
+
+offline-test: ## local synthetic contract tests; no registry or cluster
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -s tests/offline -v
+
+offline-policy-check: ## structural policy spec drift only, not live enforcement
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/offline_checks.py policy policies/kyverno/verify-images.yaml
 
 help: ## show targets
 	@grep -hE '^[a-z][a-z-]*:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | column -t -s $$'\t'

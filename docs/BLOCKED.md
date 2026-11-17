@@ -193,6 +193,20 @@ is kept permanently.
 
 **Open. This is the one to fix next.**
 
+**2026-11-17 live follow-up:** baseline and negative admissions revalidated in a
+resource-limited disposable cluster, then cleaned up. Own-proof publication is
+blocked: GitHub rejected the actual workflow-changing branch push because the
+OAuth grant lacks `workflow` scope. No own-only consumer proof or new release
+gate exists. The baseline also exposed scale-zero admission and defaulted-export
+drift-check limitations. See [investigation and raw evidence](evidence/b5-investigation-2026-11-17.md).
+
+**Offline milestone:** [offline-verification.md](offline-verification.md) adds
+local publication-content and policy-spec drift contracts with synthetic negative
+fixtures. It does not prove registry discovery, enforce a new release gate, or
+revalidate admission. B5 remains open. The options below are historical: **do not
+blindly downgrade Cosign to 2.x**. Check current support/advisories and execute an
+authorized publisher/layout/consumer compatibility experiment first.
+
 Kyverno can only discover one of the four Sigstore bundles attached to each
 image, and it is the one written by `actions/attest-build-provenance` — see
 ADR-009 for the mechanism. That step is gated on repository visibility:

@@ -1,0 +1,2 @@
+# Local contract checks only; not needed by the Go application.
+PyYAML==6.0.3

@@ -1,0 +1,545 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "kyverno.io/v1",
+            "kind": "ClusterPolicy",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"kyverno.io/v1\",\"kind\":\"ClusterPolicy\",\"metadata\":{\"annotations\":{\"policies.kyverno.io/category\":\"Supply Chain Security\",\"policies.kyverno.io/description\":\"Refuses any image that does not carry a Sigstore signature and a SLSA v1 provenance attestation from this repository's release workflow. Runs in Enforce with failurePolicy Fail: if Kyverno is unreachable the API server rejects the pod rather than admitting it unchecked. That trades availability for integrity on purpose — a fail-open admission webhook proves nothing.\",\"policies.kyverno.io/severity\":\"critical\",\"policies.kyverno.io/subject\":\"Pod\",\"policies.kyverno.io/title\":\"Verify image provenance\"},\"name\":\"verify-provenance\"},\"spec\":{\"background\":false,\"rules\":[{\"exclude\":{\"any\":[{\"resources\":{\"namespaces\":[\"kube-system\",\"kyverno\",\"calico-system\",\"tigera-operator\"]}}]},\"match\":{\"any\":[{\"resources\":{\"kinds\":[\"Pod\"]}}]},\"name\":\"verify-own-images\",\"verifyImages\":[{\"attestations\":[{\"attestors\":[{\"count\":1,\"entries\":[{\"keyless\":{\"issuer\":\"https://token.actions.githubusercontent.com\",\"rekor\":{\"url\":\"https://rekor.sigstore.dev\"},\"subject\":\"https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main\"}}]}],\"conditions\":[{\"all\":[{\"key\":\"{{ runDetails.builder.id }}\",\"operator\":\"Equals\",\"value\":\"https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main\"},{\"key\":\"{{ buildDefinition.externalParameters.workflow.repository }}\",\"operator\":\"Equals\",\"value\":\"https://github.com/PontoPe/ProvenancePipeline\"},{\"key\":\"{{ buildDefinition.externalParameters.workflow.ref }}\",\"operator\":\"Equals\",\"value\":\"refs/heads/main\"}]}],\"type\":\"https://slsa.dev/provenance/v1\"}],\"attestors\":[{\"count\":1,\"entries\":[{\"keyless\":{\"issuer\":\"https://token.actions.githubusercontent.com\",\"rekor\":{\"url\":\"https://rekor.sigstore.dev\"},\"subject\":\"https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main\"}}]}],\"failureAction\":\"Enforce\",\"imageReferences\":[\"ghcr.io/pontope/provenancepipeline*\"],\"mutateDigest\":false,\"required\":true,\"type\":\"SigstoreBundle\",\"verifyDigest\":true}]},{\"match\":{\"any\":[{\"resources\":{\"kinds\":[\"Pod\"],\"namespaceSelector\":{\"matchLabels\":{\"provenancepipeline.io/admission\":\"enforced\"}}}}]},\"name\":\"deny-unsigned-in-enforced-namespaces\",\"verifyImages\":[{\"attestors\":[{\"count\":1,\"entries\":[{\"keyless\":{\"issuer\":\"https://token.actions.githubusercontent.com\",\"rekor\":{\"url\":\"https://rekor.sigstore.dev\"},\"subject\":\"https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main\"}}]}],\"failureAction\":\"Enforce\",\"imageReferences\":[\"*\"],\"mutateDigest\":false,\"required\":true,\"type\":\"SigstoreBundle\",\"verifyDigest\":true}]}],\"webhookConfiguration\":{\"failurePolicy\":\"Fail\"}}}\n",
+                    "policies.kyverno.io/category": "Supply Chain Security",
+                    "policies.kyverno.io/description": "Refuses any image that does not carry a Sigstore signature and a SLSA v1 provenance attestation from this repository's release workflow. Runs in Enforce with failurePolicy Fail: if Kyverno is unreachable the API server rejects the pod rather than admitting it unchecked. That trades availability for integrity on purpose — a fail-open admission webhook proves nothing.",
+                    "policies.kyverno.io/severity": "critical",
+                    "policies.kyverno.io/subject": "Pod",
+                    "policies.kyverno.io/title": "Verify image provenance"
+                },
+                "creationTimestamp": "2026-11-17T19:12:56Z",
+                "generation": 7,
+                "name": "verify-provenance",
+                "resourceVersion": "1975",
+                "uid": "6792aec8-31bf-4a59-bf3c-b72f035b1744"
+            },
+            "spec": {
+                "admission": true,
+                "background": false,
+                "emitWarning": false,
+                "rules": [
+                    {
+                        "exclude": {
+                            "any": [
+                                {
+                                    "resources": {
+                                        "namespaces": [
+                                            "kube-system",
+                                            "kyverno",
+                                            "calico-system",
+                                            "tigera-operator"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "match": {
+                            "any": [
+                                {
+                                    "resources": {
+                                        "kinds": [
+                                            "Pod"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "name": "verify-own-images",
+                        "skipBackgroundRequests": true,
+                        "verifyImages": [
+                            {
+                                "attestations": [
+                                    {
+                                        "attestors": [
+                                            {
+                                                "count": 1,
+                                                "entries": [
+                                                    {
+                                                        "keyless": {
+                                                            "issuer": "https://token.actions.githubusercontent.com",
+                                                            "rekor": {
+                                                                "url": "https://rekor.sigstore.dev"
+                                                            },
+                                                            "subject": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                        },
+                                                        "signatureAlgorithm": "sha256"
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        "conditions": [
+                                            {
+                                                "all": [
+                                                    {
+                                                        "key": "{{ runDetails.builder.id }}",
+                                                        "operator": "Equals",
+                                                        "value": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                    },
+                                                    {
+                                                        "key": "{{ buildDefinition.externalParameters.workflow.repository }}",
+                                                        "operator": "Equals",
+                                                        "value": "https://github.com/PontoPe/ProvenancePipeline"
+                                                    },
+                                                    {
+                                                        "key": "{{ buildDefinition.externalParameters.workflow.ref }}",
+                                                        "operator": "Equals",
+                                                        "value": "refs/heads/main"
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        "type": "https://slsa.dev/provenance/v1"
+                                    }
+                                ],
+                                "attestors": [
+                                    {
+                                        "count": 1,
+                                        "entries": [
+                                            {
+                                                "keyless": {
+                                                    "issuer": "https://token.actions.githubusercontent.com",
+                                                    "rekor": {
+                                                        "url": "https://rekor.sigstore.dev"
+                                                    },
+                                                    "subject": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                },
+                                                "signatureAlgorithm": "sha256"
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "failureAction": "Enforce",
+                                "imageReferences": [
+                                    "ghcr.io/pontope/provenancepipeline*"
+                                ],
+                                "mutateDigest": false,
+                                "required": true,
+                                "type": "SigstoreBundle",
+                                "useCache": true,
+                                "verifyDigest": true
+                            }
+                        ]
+                    },
+                    {
+                        "match": {
+                            "any": [
+                                {
+                                    "resources": {
+                                        "kinds": [
+                                            "Pod"
+                                        ],
+                                        "namespaceSelector": {
+                                            "matchLabels": {
+                                                "provenancepipeline.io/admission": "enforced"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "name": "deny-unsigned-in-enforced-namespaces",
+                        "skipBackgroundRequests": true,
+                        "verifyImages": [
+                            {
+                                "attestors": [
+                                    {
+                                        "count": 1,
+                                        "entries": [
+                                            {
+                                                "keyless": {
+                                                    "issuer": "https://token.actions.githubusercontent.com",
+                                                    "rekor": {
+                                                        "url": "https://rekor.sigstore.dev"
+                                                    },
+                                                    "subject": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                },
+                                                "signatureAlgorithm": "sha256"
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "failureAction": "Enforce",
+                                "imageReferences": [
+                                    "*"
+                                ],
+                                "mutateDigest": false,
+                                "required": true,
+                                "type": "SigstoreBundle",
+                                "useCache": true,
+                                "verifyDigest": true
+                            }
+                        ]
+                    }
+                ],
+                "validationFailureAction": "Audit",
+                "webhookConfiguration": {
+                    "failurePolicy": "Fail"
+                }
+            },
+            "status": {
+                "autogen": {
+                    "rules": [
+                        {
+                            "exclude": {
+                                "any": [
+                                    {
+                                        "resources": {
+                                            "namespaces": [
+                                                "kube-system",
+                                                "kyverno",
+                                                "calico-system",
+                                                "tigera-operator"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "resources": {}
+                            },
+                            "match": {
+                                "any": [
+                                    {
+                                        "resources": {
+                                            "kinds": [
+                                                "apps/v1/DaemonSet",
+                                                "apps/v1/Deployment",
+                                                "batch/v1/Job",
+                                                "apps/v1/ReplicaSet",
+                                                "v1/ReplicationController",
+                                                "apps/v1/StatefulSet"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "resources": {}
+                            },
+                            "name": "autogen-verify-own-images",
+                            "skipBackgroundRequests": true,
+                            "verifyImages": [
+                                {
+                                    "attestations": [
+                                        {
+                                            "attestors": [
+                                                {
+                                                    "count": 1,
+                                                    "entries": [
+                                                        {
+                                                            "keyless": {
+                                                                "issuer": "https://token.actions.githubusercontent.com",
+                                                                "rekor": {
+                                                                    "url": "https://rekor.sigstore.dev"
+                                                                },
+                                                                "subject": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                            },
+                                                            "signatureAlgorithm": "sha256"
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "conditions": [
+                                                {
+                                                    "all": [
+                                                        {
+                                                            "key": "{{ runDetails.builder.id }}",
+                                                            "operator": "Equals",
+                                                            "value": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                        },
+                                                        {
+                                                            "key": "{{ buildDefinition.externalParameters.workflow.repository }}",
+                                                            "operator": "Equals",
+                                                            "value": "https://github.com/PontoPe/ProvenancePipeline"
+                                                        },
+                                                        {
+                                                            "key": "{{ buildDefinition.externalParameters.workflow.ref }}",
+                                                            "operator": "Equals",
+                                                            "value": "refs/heads/main"
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "predicateType": "",
+                                            "type": "https://slsa.dev/provenance/v1"
+                                        }
+                                    ],
+                                    "attestors": [
+                                        {
+                                            "count": 1,
+                                            "entries": [
+                                                {
+                                                    "keyless": {
+                                                        "issuer": "https://token.actions.githubusercontent.com",
+                                                        "rekor": {
+                                                            "url": "https://rekor.sigstore.dev"
+                                                        },
+                                                        "subject": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                    },
+                                                    "signatureAlgorithm": "sha256"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "failureAction": "Enforce",
+                                    "imageReferences": [
+                                        "ghcr.io/pontope/provenancepipeline*"
+                                    ],
+                                    "mutateDigest": false,
+                                    "required": true,
+                                    "type": "SigstoreBundle",
+                                    "useCache": true,
+                                    "validate": {},
+                                    "verifyDigest": true
+                                }
+                            ]
+                        },
+                        {
+                            "exclude": {
+                                "any": [
+                                    {
+                                        "resources": {
+                                            "kinds": [
+                                                "batch/v1/CronJob"
+                                            ],
+                                            "namespaces": [
+                                                "kube-system",
+                                                "kyverno",
+                                                "calico-system",
+                                                "tigera-operator"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "resources": {}
+                            },
+                            "match": {
+                                "any": [
+                                    {
+                                        "resources": {
+                                            "kinds": [
+                                                "batch/v1/CronJob"
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "resources": {}
+                            },
+                            "name": "autogen-cronjob-verify-own-images",
+                            "skipBackgroundRequests": true,
+                            "verifyImages": [
+                                {
+                                    "attestations": [
+                                        {
+                                            "attestors": [
+                                                {
+                                                    "count": 1,
+                                                    "entries": [
+                                                        {
+                                                            "keyless": {
+                                                                "issuer": "https://token.actions.githubusercontent.com",
+                                                                "rekor": {
+                                                                    "url": "https://rekor.sigstore.dev"
+                                                                },
+                                                                "subject": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                            },
+                                                            "signatureAlgorithm": "sha256"
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "conditions": [
+                                                {
+                                                    "all": [
+                                                        {
+                                                            "key": "{{ runDetails.builder.id }}",
+                                                            "operator": "Equals",
+                                                            "value": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                        },
+                                                        {
+                                                            "key": "{{ buildDefinition.externalParameters.workflow.repository }}",
+                                                            "operator": "Equals",
+                                                            "value": "https://github.com/PontoPe/ProvenancePipeline"
+                                                        },
+                                                        {
+                                                            "key": "{{ buildDefinition.externalParameters.workflow.ref }}",
+                                                            "operator": "Equals",
+                                                            "value": "refs/heads/main"
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "predicateType": "",
+                                            "type": "https://slsa.dev/provenance/v1"
+                                        }
+                                    ],
+                                    "attestors": [
+                                        {
+                                            "count": 1,
+                                            "entries": [
+                                                {
+                                                    "keyless": {
+                                                        "issuer": "https://token.actions.githubusercontent.com",
+                                                        "rekor": {
+                                                            "url": "https://rekor.sigstore.dev"
+                                                        },
+                                                        "subject": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                    },
+                                                    "signatureAlgorithm": "sha256"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "failureAction": "Enforce",
+                                    "imageReferences": [
+                                        "ghcr.io/pontope/provenancepipeline*"
+                                    ],
+                                    "mutateDigest": false,
+                                    "required": true,
+                                    "type": "SigstoreBundle",
+                                    "useCache": true,
+                                    "validate": {},
+                                    "verifyDigest": true
+                                }
+                            ]
+                        },
+                        {
+                            "match": {
+                                "any": [
+                                    {
+                                        "resources": {
+                                            "kinds": [
+                                                "apps/v1/DaemonSet",
+                                                "apps/v1/Deployment",
+                                                "batch/v1/Job",
+                                                "apps/v1/ReplicaSet",
+                                                "v1/ReplicationController",
+                                                "apps/v1/StatefulSet"
+                                            ],
+                                            "namespaceSelector": {
+                                                "matchLabels": {
+                                                    "provenancepipeline.io/admission": "enforced"
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                "resources": {}
+                            },
+                            "name": "autogen-deny-unsigned-in-enforced-namespaces",
+                            "skipBackgroundRequests": true,
+                            "verifyImages": [
+                                {
+                                    "attestors": [
+                                        {
+                                            "count": 1,
+                                            "entries": [
+                                                {
+                                                    "keyless": {
+                                                        "issuer": "https://token.actions.githubusercontent.com",
+                                                        "rekor": {
+                                                            "url": "https://rekor.sigstore.dev"
+                                                        },
+                                                        "subject": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                    },
+                                                    "signatureAlgorithm": "sha256"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "failureAction": "Enforce",
+                                    "imageReferences": [
+                                        "*"
+                                    ],
+                                    "mutateDigest": false,
+                                    "required": true,
+                                    "type": "SigstoreBundle",
+                                    "useCache": true,
+                                    "validate": {},
+                                    "verifyDigest": true
+                                }
+                            ]
+                        },
+                        {
+                            "match": {
+                                "any": [
+                                    {
+                                        "resources": {
+                                            "kinds": [
+                                                "batch/v1/CronJob"
+                                            ],
+                                            "namespaceSelector": {
+                                                "matchLabels": {
+                                                    "provenancepipeline.io/admission": "enforced"
+                                                }
+                                            }
+                                        }
+                                    }
+                                ],
+                                "resources": {}
+                            },
+                            "name": "autogen-cronjob-deny-unsigned-in-enforced-namespaces",
+                            "skipBackgroundRequests": true,
+                            "verifyImages": [
+                                {
+                                    "attestors": [
+                                        {
+                                            "count": 1,
+                                            "entries": [
+                                                {
+                                                    "keyless": {
+                                                        "issuer": "https://token.actions.githubusercontent.com",
+                                                        "rekor": {
+                                                            "url": "https://rekor.sigstore.dev"
+                                                        },
+                                                        "subject": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+                                                    },
+                                                    "signatureAlgorithm": "sha256"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "failureAction": "Enforce",
+                                    "imageReferences": [
+                                        "*"
+                                    ],
+                                    "mutateDigest": false,
+                                    "required": true,
+                                    "type": "SigstoreBundle",
+                                    "useCache": true,
+                                    "validate": {},
+                                    "verifyDigest": true
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-11-17T19:12:56Z",
+                        "message": "Ready",
+                        "reason": "Succeeded",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "rulecount": {
+                    "generate": 0,
+                    "mutate": 0,
+                    "validate": 0,
+                    "verifyimages": 2
+                },
+                "validatingadmissionpolicy": {
+                    "generated": false,
+                    "message": ""
+                }
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

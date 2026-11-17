@@ -1,0 +1,26 @@
+[
+  {
+    "digest": "sha256:770f24903322a09deebf7c40cf3843a1c418680e86f04e82b22849ab23d6342a",
+    "descriptor_artifactType": "application/vnd.oci.empty.v1+json",
+    "manifest_artifactType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+    "predicateType": "https://sigstore.dev/cosign/sign/v1"
+  },
+  {
+    "digest": "sha256:9d77f32a5e8db305fcc15c1fe7f2d6a1f6cf1518c52f4bb93ee555caaa5a712f",
+    "descriptor_artifactType": "application/vnd.oci.empty.v1+json",
+    "manifest_artifactType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+    "predicateType": "https://sigstore.dev/cosign/sign/v1"
+  },
+  {
+    "digest": "sha256:ec593b834e4a0353ddbd7d3f562a1fde1be5334a16e44d761d37cbde00d618d0",
+    "descriptor_artifactType": "application/vnd.oci.empty.v1+json",
+    "manifest_artifactType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+    "predicateType": "https://sigstore.dev/cosign/sign/v1"
+  },
+  {
+    "digest": "sha256:f23d033f69d77028939ae39d7d40abb831a1af4f22852e7e36ca1a485b72bf15",
+    "descriptor_artifactType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+    "manifest_artifactType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+    "predicateType": "https://slsa.dev/provenance/v1"
+  }
+]

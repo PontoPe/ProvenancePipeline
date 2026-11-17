@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "run",
+    "webhook-network-outage",
+    "-n",
+    "prove-lab",
+    "--image=docker.io/library/busybox@sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec",
+    "--restart=Never",
+    "--dry-run=server"
+  ],
+  "rc": 1,
+  "seconds": 0.06177879590541124,
+  "stdout": "",
+  "stderr": "Error from server (InternalError): Internal error occurred: failed calling webhook \"mutate.kyverno.svc-fail\": failed to call webhook: Post \"https://kyverno-svc.kyverno.svc:443/mutate/fail?timeout=10s\": dial tcp 10.96.40.195:443: connect: connection refused\n"
+}
