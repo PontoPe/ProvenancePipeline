@@ -1,0 +1,36 @@
+{
+  "buildDefinition": {
+    "buildType": "https://github.com/PontoPe/ProvenancePipeline/build-types/github-actions/v1",
+    "externalParameters": {
+      "workflow": {
+        "ref": "refs/heads/main",
+        "repository": "https://github.com/PontoPe/ProvenancePipeline",
+        "path": ".github/workflows/release.yml"
+      }
+    },
+    "internalParameters": {
+      "github": {
+        "event_name": "workflow_dispatch",
+        "repository_id": "1315312943",
+        "repository_owner_id": "96898980"
+      }
+    },
+    "resolvedDependencies": [
+      {
+        "uri": "git+https://github.com/PontoPe/ProvenancePipeline@refs/heads/main",
+        "digest": {
+          "gitCommit": "20d86660e9fa3151ce1fb35401b858c8f91d3b11"
+        }
+      }
+    ]
+  },
+  "runDetails": {
+    "builder": {
+      "id": "https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main"
+    },
+    "metadata": {
+      "invocationId": "https://github.com/PontoPe/ProvenancePipeline/actions/runs/44209229722/attempts/1",
+      "finishedOn": "2026-11-18T00:40:00Z"
+    }
+  }
+}

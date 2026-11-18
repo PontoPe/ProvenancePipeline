@@ -1,0 +1,5 @@
+Flag --use-signing-config has been deprecated, an offline signing flag will be added in the future; TUF will continue to provide a signing config by default if one is not provided manually
+Flag --tlog-upload has been deprecated, prefer using a --signing-config file with no transparency log services
+Using statement from: .lab/round2/synthetic-statement.json
+Signing artifact...
+Wrote bundle to file .lab/round2/synthetic-test.bundle.json

@@ -1,0 +1,119 @@
+build, sign, attest	vulnerability gate (grype)	﻿2026-11-18T00:18:10.0246609Z ##[group]Run anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.0247012Z with:
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.0247203Z   sbom: sbom.spdx.json
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.0247423Z   fail-build: true
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.0247631Z   severity-cutoff: critical
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.0247860Z   output-format: table
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.0248066Z   only-fixed: false
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.0248268Z   add-cpes-if-none: false
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.0248493Z   by-cve: false
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.0248684Z ##[endgroup]
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.1569836Z Installing grype v0.110.0
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.1576722Z Downloading grype v0.110.0 via https://raw.githubusercontent.com/anchore/grype/main/install.sh
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.2130682Z ##[group]sh /home/runner/work/_temp/25fedfe3-9cf2-4ea6-90fc-eb042bfc0364 -d -b /tmp/grype-download-lauHU4 v0.110.0
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.2218395Z [info] checking github for release tag='v0.110.0' 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.2219215Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.2276806Z [debug] http_download(url=https://github.com/anchore/grype/releases/v0.110.0) 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.2277760Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.4961360Z [info] fetching release script for tag='v0.110.0' 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.4961850Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.5002283Z [debug] http_download(url=https://get.anchore.io/grype/v0.110.0/install.sh) 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.5003005Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.6645430Z [info] checking github for release tag='v0.110.0' 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.6646042Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.6699055Z [debug] http_download(url=https://github.com/anchore/grype/releases/v0.110.0) 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.6699831Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.7201562Z [info] using release tag='v0.110.0' version='0.110.0' os='linux' arch='amd64' 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.7202279Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.7236932Z [debug] downloading files into /tmp/tmp.0YaNXE4CXE 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.7237529Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.7276528Z [debug] http_download(url=https://github.com/anchore/grype/releases/download/v0.110.0/grype_0.110.0_checksums.txt) 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.7277308Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.9157767Z [debug] http_download(url=https://github.com/anchore/grype/releases/download/v0.110.0/grype_0.110.0_linux_amd64.tar.gz) 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:10.9158662Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:11.6647490Z [info] installed /tmp/grype-download-lauHU4/grype 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:11.6648041Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:11.6872937Z ##[endgroup]
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:11.7262555Z ##[group]/opt/hostedtoolcache/grype/0.110.0/x64/grype -v -o table --file /tmp/grype-Kam3wq/output --fail-on critical sbom:sbom.spdx.json
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:11.7539047Z [0000]  INFO grype version: 0.110.0
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:11.7539510Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:11.8160190Z [0000]  INFO using distro: debian 12
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:11.8160626Z [0000]  INFO gathered packages packages=6 time=61.653749ms
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:11.8160882Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:12.0309686Z [0000]  INFO downloading new vulnerability DB
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:12.0310272Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:31.6839395Z [0019]  INFO downloaded vulnerability DB time=19.929229356s url=https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-11-17T00:22:24Z_1794896458.tar.zst?checksum=sha256%3A3f0cbdbc9d40fb69eaeacec1869b27a8c74f1894108804ace8b7468513e2df07
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:18:31.6841136Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:32.1049425Z [0080]  INFO installed new vulnerability DB built=2026-11-17T06:20:58Z version=v6.1.10
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:32.1050035Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.5676157Z [0081]  INFO loaded DB status=valid time=1m21.813156s
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.5676611Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6286752Z [0081]  INFO found vulnerability matches time=61.012747ms
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6287299Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6447665Z [0081] ERROR discovered vulnerabilities at or above the severity threshold
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6448154Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6620530Z ##[endgroup]
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6622169Z NAME    INSTALLED  FIXED IN                       TYPE       VULNERABILITY    SEVERITY  EPSS          RISK   
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6623083Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-5026     High      1.8% (79th)   1.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6624247Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-78663   Critical  0.9% (59th)   0.8    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6625648Z stdlib  go1.26.5   1.26.9                         go-module  GO-2026-6612     Critical  0.9% (59th)   0.8    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6626589Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-78659   High      0.9% (59th)   0.6    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6627525Z stdlib  go1.26.5   1.26.9                         go-module  GO-2026-6603     High      0.9% (59th)   0.6    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6628488Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-78669   High      0.8% (58th)   0.6    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6629201Z stdlib  go1.26.5   1.26.9                         go-module  GO-2026-6611     High      0.8% (58th)   0.6    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6629755Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-97031   High      0.7% (54th)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6630276Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  GO-2026-6607     High      0.7% (54th)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6630806Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-94440   High      0.7% (53rd)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6631342Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  GO-2026-6608     High      0.7% (53rd)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6631871Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  GO-2026-6604     Critical  0.6% (46th)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6632404Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-97032   High      0.7% (52nd)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6632931Z stdlib  go1.26.5   1.26.9                         go-module  GO-2026-6617     High      0.7% (52nd)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6633535Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-78667   High      0.7% (52nd)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6634291Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  GO-2026-6609     High      0.7% (52nd)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6635229Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-56866   High      0.6% (49th)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6635911Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  GO-2026-6605     High      0.6% (49th)   0.5    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6636491Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  CVE-2026-33818   High      0.6% (47th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6637063Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  CVE-2026-56853   High      0.6% (47th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6637857Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  CVE-2026-56859   High      0.6% (47th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6638429Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-5972     High      0.6% (47th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6638977Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6088     High      0.6% (47th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6639552Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6089     High      0.6% (47th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6640123Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  CVE-2026-56862   High      0.6% (47th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6640680Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6090     High      0.6% (47th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6641216Z stdlib  go1.26.5   *1.26.6, 1.27.0-rc.3           go-module  CVE-2026-46600   High      0.5% (46th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6641815Z stdlib  go1.26.5   *1.26.6, 1.27.0-rc.3           go-module  GO-2026-5942     High      0.5% (46th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6642406Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-78660   High      0.5% (46th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6642976Z stdlib  go1.26.5   1.26.9                         go-module  GO-2026-6610     High      0.5% (46th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6643547Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-94439   High      0.5% (45th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6644543Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  GO-2026-6613     High      0.5% (45th)   0.4    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6645165Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  CVE-2026-56860   Medium    0.5% (46th)   0.3    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6645792Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6218     Medium    0.5% (46th)   0.3    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6646434Z stdlib  go1.26.5   *1.26.10, 1.27.3               go-module  CVE-2026-111943  Medium    0.4% (34th)   0.2    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6647050Z stdlib  go1.26.5   *1.26.10, 1.27.3               go-module  GO-2026-6809     Medium    0.4% (34th)   0.2    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6647630Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  CVE-2026-56864   High      0.3% (22nd)   0.2    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6648218Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  CVE-2026-56858   Medium    0.3% (24th)   0.2    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6648786Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  GO-2026-6091     Medium    0.3% (24th)   0.2    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6649401Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-94448   Medium    0.3% (21st)   0.2    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6650050Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-97030   Medium    0.3% (21st)   0.2    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6650612Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  GO-2026-6599     Medium    0.3% (21st)   0.2    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6651184Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  GO-2026-6600     Medium    0.3% (21st)   0.2    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6651743Z stdlib  go1.26.5   1.25.13, *1.26.6, 1.27.0-rc.3  go-module  CVE-2026-56865   High      0.1% (2nd)    0.1    
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6652320Z stdlib  go1.26.5   *1.26.11, 1.27.4               go-module  GO-2026-6859     Medium    0.2% (6th)    < 0.1  
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6652893Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-94447   High      0.1% (0th)    < 0.1  
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6653467Z stdlib  go1.26.5   *1.26.9, 1.27.2                go-module  CVE-2026-94444   High      < 0.1% (0th)  < 0.1  
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6653800Z 
+build, sign, attest	vulnerability gate (grype)	2026-11-18T00:19:33.6680990Z ##[error]Failed minimum severity level. Found vulnerabilities with level 'critical' or higher
+build, sign, attest	preserve publication evidence even on failure	﻿2026-11-18T00:19:33.6818920Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.6819495Z with:
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.6819688Z   name: own-publication
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.6819925Z   path: publication/
+build, sign, attest	preserve publication evidence even on failure	*.bundle.json
+build, sign, attest	preserve publication evidence even on failure	
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.6820187Z   if-no-files-found: error
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.6820412Z   compression-level: 6
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.6820621Z   overwrite: false
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.6820828Z   include-hidden-files: false
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.6821064Z   archive: true
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.6821256Z ##[endgroup]
+build, sign, attest	preserve publication evidence even on failure	2026-11-18T00:19:33.8308673Z ##[error]No files were found with the provided path: publication/
+build, sign, attest	preserve publication evidence even on failure	*.bundle.json. No artifacts will be uploaded.

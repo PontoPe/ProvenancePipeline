@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "docker",
+    "exec",
+    "prove-lab-b387df5c-control-plane",
+    "iptables",
+    "-L",
+    "FORWARD",
+    "-v",
+    "-n"
+  ],
+  "rc": 0,
+  "seconds": 0.09079004102386534,
+  "stdout": "Chain FORWARD (policy ACCEPT 0 packets, 0 bytes)\n pkts bytes target     prot opt in     out     source               destination         \n    7   623 REJECT     tcp  --  *      *       0.0.0.0/0            4.228.31.152         tcp dpt:443 /* prove-lab-b5-registry-outage */ reject-with icmp-port-unreachable\n  383 33330 KUBE-PROXY-FIREWALL  all  --  *      *       0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes load balancer firewall */\n57813  124M KUBE-FORWARD  all  --  *      *       0.0.0.0/0            0.0.0.0/0            /* kubernetes forwarding rules */\n  383 33330 KUBE-SERVICES  all  --  *      *       0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes service portals */\n  383 33330 KUBE-EXTERNAL-SERVICES  all  --  *      *       0.0.0.0/0            0.0.0.0/0            ctstate NEW /* kubernetes externally-visible service portals */\n",
+  "stderr": ""
+}

@@ -1,0 +1,7 @@
+Preparing badpredicate/provenance.bundle.json
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Exists    bbbc1f5a0092 badpredicate/provenance.bundle.json
+Uploading d7b842d3cb46 application/vnd.oci.image.manifest.v1+json
+Uploaded  d7b842d3cb46 application/vnd.oci.image.manifest.v1+json
+Attached to [registry] ghcr.io/pontope/provenancepipeline@sha256:e32e961d471f6de7522c658e2e4214001b78ef35bb3883858f73dd38353c85c0
+Digest: sha256:d7b842d3cb466584b8f4b57cf32034ae065a9f587aebb72726d4a7ba211f5753

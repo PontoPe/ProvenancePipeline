@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "docker",
+    "exec",
+    "prove-lab-b387df5c-control-plane",
+    "iptables",
+    "-D",
+    "OUTPUT",
+    "-d",
+    "10.244.0.14",
+    "-p",
+    "tcp",
+    "--dport",
+    "9443",
+    "-m",
+    "comment",
+    "--comment",
+    "prove-lab-b5-webhook-outage",
+    "-j",
+    "REJECT"
+  ],
+  "rc": 0,
+  "seconds": 0.12013482814654708,
+  "stdout": "",
+  "stderr": ""
+}

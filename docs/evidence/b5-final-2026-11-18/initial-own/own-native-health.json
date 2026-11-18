@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "get",
+    "--raw",
+    "/api/v1/namespaces/prove-lab/pods/own-native:8080/proxy/healthz"
+  ],
+  "rc": 0,
+  "seconds": 0.22623152984306216,
+  "stdout": "ok\n",
+  "stderr": ""
+}

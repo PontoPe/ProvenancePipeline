@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "python3",
+    "/home/pontope/Coding/ProvenancePipeline/scripts/check_enforcement.py",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--out",
+    ".lab/round2/outages-v1-final/absence-detected"
+  ],
+  "rc": 1,
+  "seconds": 0.07875702693127096,
+  "stdout": "{\"status\": \"rejected\", \"error\": \"policy absent or export unavailable\"}\n",
+  "stderr": ""
+}

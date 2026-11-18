@@ -1,0 +1,17 @@
+test_own_publication_is_required_and_precedes_optional_writer (test_release_gate.ReleaseGateTests.test_own_publication_is_required_and_precedes_optional_writer) ... ok
+test_provenance_uses_v1_statement_not_native_v01_wrapper (test_release_gate.ReleaseGateTests.test_provenance_uses_v1_statement_not_native_v01_wrapper) ... FAIL
+test_publisher_propagates_remote_and_verifier_failure (test_release_gate.ReleaseGateTests.test_publisher_propagates_remote_and_verifier_failure) ... ok
+test_skip_github_writer_also_skips_github_verifier (test_release_gate.ReleaseGateTests.test_skip_github_writer_also_skips_github_verifier) ... ok
+
+======================================================================
+FAIL: test_provenance_uses_v1_statement_not_native_v01_wrapper (test_release_gate.ReleaseGateTests.test_provenance_uses_v1_statement_not_native_v01_wrapper)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/pontope/Coding/ProvenancePipeline/tests/offline/test_release_gate.py", line 48, in test_provenance_uses_v1_statement_not_native_v01_wrapper
+    self.assertIn('cosign attest-blob', step['run'])
+AssertionError: 'cosign attest-blob' not found in 'cosign attest --yes --bundle provenance.bundle.json --type slsaprovenance1 --predicate provenance.json "$REF"'
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.042s
+
+FAILED (failures=1)

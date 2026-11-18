@@ -1,0 +1,8 @@
+Preparing provenance.bundle.json
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Uploading 4cb93293bbea provenance.bundle.json
+Uploaded  4cb93293bbea provenance.bundle.json
+Uploading 511fb947e8a8 application/vnd.oci.image.manifest.v1+json
+Uploaded  511fb947e8a8 application/vnd.oci.image.manifest.v1+json
+Attached to [registry] ghcr.io/pontope/provenancepipeline@sha256:ba656a50370cd2e5151e6172f562535ae331b336b04974828931cb402c6b0133
+Digest: sha256:511fb947e8a8c20ec6058bffee845fe63f7c941d6df9af7787a555d2247aae90

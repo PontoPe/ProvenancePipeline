@@ -1,0 +1,7 @@
+Preparing sbom.bundle.json
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Exists    29dcf3302802 sbom.bundle.json
+Uploading dd8e6f3d0ea7 application/vnd.oci.image.manifest.v1+json
+Uploaded  dd8e6f3d0ea7 application/vnd.oci.image.manifest.v1+json
+Attached to [registry] ghcr.io/pontope/provenancepipeline@sha256:ba656a50370cd2e5151e6172f562535ae331b336b04974828931cb402c6b0133
+Digest: sha256:dd8e6f3d0ea76975e52afc184bc53c53cec2522f8e2e3c5582f8e4e91cd37bd1

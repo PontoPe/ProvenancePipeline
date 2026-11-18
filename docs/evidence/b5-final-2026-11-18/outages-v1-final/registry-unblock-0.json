@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "docker",
+    "exec",
+    "prove-lab-b387df5c-control-plane",
+    "iptables",
+    "-D",
+    "FORWARD",
+    "-d",
+    "4.228.31.152",
+    "-p",
+    "tcp",
+    "--dport",
+    "443",
+    "-m",
+    "comment",
+    "--comment",
+    "prove-lab-b5-registry-outage",
+    "-j",
+    "REJECT"
+  ],
+  "rc": 0,
+  "seconds": 0.12262806599028409,
+  "stdout": "",
+  "stderr": ""
+}

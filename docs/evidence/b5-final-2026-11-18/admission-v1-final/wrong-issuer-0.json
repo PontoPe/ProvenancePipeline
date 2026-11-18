@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 1,
+  "seconds": 5.1865767578128725,
+  "stdout": "",
+  "stderr": "Error from server: error when creating \"STDIN\": admission webhook \"mutate.kyverno.svc-fail\" denied the request: \n\nresource Pod/prove-lab/wrong-issuer-0 was blocked due to the following policies \n\nverify-provenance:\n  deny-unsigned-in-enforced-namespaces: 'failed to verify image ghcr.io/pontope/provenancepipeline@sha256:ba656a50370cd2e5151e6172f562535ae331b336b04974828931cb402c6b0133: .attestors[0].entries[0].keyless: sigstore bundle verification failed: no matching signatures found'\n  verify-own-images: 'failed to verify image ghcr.io/pontope/provenancepipeline@sha256:ba656a50370cd2e5151e6172f562535ae331b336b04974828931cb402c6b0133: .attestors[0].entries[0].keyless: sigstore bundle verification failed: no matching signatures found'\n"
+}

@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 0,
+  "seconds": 13.164131654193625,
+  "stdout": "pod/wrong-identity-recovered-0 created (server dry run)\n",
+  "stderr": ""
+}

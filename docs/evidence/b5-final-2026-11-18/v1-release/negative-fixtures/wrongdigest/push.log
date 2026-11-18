@@ -1,0 +1,9 @@
+Preparing wrongdigest/payload.txt
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Uploading ed1d44bbaef2 wrongdigest/payload.txt
+Uploaded  ed1d44bbaef2 wrongdigest/payload.txt
+Uploading 50bf0a2f13d1 application/vnd.oci.image.manifest.v1+json
+Uploaded  50bf0a2f13d1 application/vnd.oci.image.manifest.v1+json
+Pushed [registry] ghcr.io/pontope/provenancepipeline:b5-wrongdigest-44209229722
+ArtifactType: application/vnd.provenancepipeline.b5-fixture.v1
+Digest: sha256:50bf0a2f13d10ddd992c2999ea517a9e12d7bd5db910f2c891ad3cd417964f15

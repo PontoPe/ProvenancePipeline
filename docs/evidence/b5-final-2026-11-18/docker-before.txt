@@ -1,0 +1,8 @@
+homeassistant a683736d9c55 Up 3 weeks
+uptime-kuma 6d077e54bf64 Up 3 weeks (healthy)
+nextcloud-app-1 486e98ad3504 Up 3 weeks
+teamspeak6-server 70c62a422b4a Up 3 weeks
+taskchampion 1a9661b67669 Up 3 weeks
+nextcloud-tunnel-1 1a944eac5190 Up 3 weeks
+nextcloud-redis-1 4c7d9488bcea Up 3 weeks
+nextcloud-db-1 5974baaddeff Up 3 weeks (healthy)

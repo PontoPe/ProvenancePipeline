@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 1,
+  "seconds": 10.099827969213948,
+  "stdout": "",
+  "stderr": "Error from server (InternalError): error when creating \"STDIN\": Internal error occurred: failed calling webhook \"mutate.kyverno.svc-fail\": failed to call webhook: Post \"https://kyverno-svc.kyverno.svc:443/mutate/fail?timeout=10s\": context deadline exceeded\n"
+}

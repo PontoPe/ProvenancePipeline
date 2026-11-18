@@ -1,0 +1,10 @@
+{
+  "configured_ttl_seconds": 20,
+  "default_ttl_seconds": 3600,
+  "configured_cache_capacity": 1048576,
+  "warm_probe_seconds_after_verification": 11.386577097931877,
+  "warm_rc": 1,
+  "expired_rc": 1,
+  "cold_rc": 1,
+  "scope": "GHCR IPv4 HTTPS rejected in own kind node FORWARD chain only"
+}

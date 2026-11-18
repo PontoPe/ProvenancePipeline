@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "--as=system:serviceaccount:prove-lab:enforcement-observer",
+    "get",
+    "clusterpolicy",
+    "verify-provenance",
+    "-o",
+    "json"
+  ],
+  "rc": 1,
+  "seconds": 0.038619279162958264,
+  "stdout": "",
+  "stderr": "Warning: kyverno.io/v1 ClusterPolicy is deprecated and will be removed in a future release; migrate to ValidatingPolicy, MutatingPolicy, GeneratingPolicy or ImageValidatingPolicy (policies.kyverno.io), see https://kyverno.io/docs/guides/migration-to-cel/\nError from server (NotFound): clusterpolicies.kyverno.io \"verify-provenance\" not found\n"
+}

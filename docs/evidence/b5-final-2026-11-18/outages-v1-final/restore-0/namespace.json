@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "--as=system:serviceaccount:prove-lab:enforcement-observer",
+    "get",
+    "namespace",
+    "prove-lab",
+    "-o",
+    "json"
+  ],
+  "rc": 0,
+  "seconds": 0.03190362313762307,
+  "stdout": "{\n    \"apiVersion\": \"v1\",\n    \"kind\": \"Namespace\",\n    \"metadata\": {\n        \"creationTimestamp\": \"2026-11-18T00:24:12Z\",\n        \"labels\": {\n            \"kubernetes.io/metadata.name\": \"prove-lab\",\n            \"provenancepipeline.io/admission\": \"enforced\"\n        },\n        \"name\": \"prove-lab\",\n        \"resourceVersion\": \"2401\",\n        \"uid\": \"771f91e8-3638-44da-a8d0-95221b62662c\"\n    },\n    \"spec\": {\n        \"finalizers\": [\n            \"kubernetes\"\n        ]\n    },\n    \"status\": {\n        \"phase\": \"Active\"\n    }\n}\n",
+  "stderr": ""
+}

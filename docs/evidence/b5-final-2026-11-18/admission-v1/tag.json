@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 1,
+  "seconds": 6.053065234096721,
+  "stdout": "",
+  "stderr": "Error from server: error when creating \"STDIN\": admission webhook \"validate.kyverno.svc-fail\" denied the request: \n\nresource Pod/prove-lab/tag was blocked due to the following policies \n\nverify-provenance:\n  deny-unsigned-in-enforced-namespaces: missing digest for ghcr.io/pontope/provenancepipeline:latest\n  verify-own-images: missing digest for ghcr.io/pontope/provenancepipeline:latest\n"
+}
