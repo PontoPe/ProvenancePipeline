@@ -11,7 +11,7 @@ cp provenance.json negative-fixtures/good-predicate.json
 cp signature.bundle.json negative-fixtures/good-signature.bundle.json
 cp provenance.bundle.json negative-fixtures/good-provenance.bundle.json
 cd negative-fixtures
-for kind in wrongdigest badpredicate; do
+for kind in cosignonly wrongdigest badpredicate; do
   mkdir "$kind"
   printf 'Intentional B5 negative fixture: %s run %s\n' "$kind" "$GITHUB_RUN_ID" > "$kind/payload.txt"
   timeout 180 oras push --artifact-type application/vnd.provenancepipeline.b5-fixture.v1 \
@@ -20,7 +20,17 @@ for kind in wrongdigest badpredicate; do
   digest="sha256:$(sha256sum "$kind/subject.manifest.json" | cut -d' ' -f1)"
   target="$image@$digest"
   printf '%s\n' "$target" > "$kind/ref.txt"
-  if [[ "$kind" == badpredicate ]]; then
+  if [[ "$kind" == cosignonly ]]; then
+    # Correct own signature/provenance, deliberately retain the native invisible layout.
+    timeout 180 cosign sign --yes --bundle "$kind/signature.bundle.json" "$target"
+    timeout 180 cosign attest --yes --type slsaprovenance1 --predicate good-predicate.json \
+      --bundle "$kind/provenance.bundle.json" "$target"
+    timeout 180 cosign verify-attestation --type slsaprovenance1 \
+      --certificate-identity "$IDENTITY" --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+      "$target" > "$kind/cli-verified.ndjson"
+    timeout 90 oras manifest fetch "$image:${digest/:/-}" --output "$kind/index.json"
+    continue
+  elif [[ "$kind" == badpredicate ]]; then
     jq '.buildDefinition.externalParameters.workflow.repository = "https://github.com/PontoPe/not-this-repository"' good-predicate.json > "$kind/predicate.json"
     timeout 180 cosign sign --yes --bundle "$kind/signature.bundle.json" "$target"
     timeout 180 cosign attest --yes --type slsaprovenance1 --predicate "$kind/predicate.json" \

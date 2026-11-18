@@ -41,6 +41,14 @@ class ReleaseGateTests(unittest.TestCase):
             self.assertEqual(result.returncode, 73)
             self.assertTrue((path / 'out/oras-called').exists())
 
+    def test_provenance_uses_v1_statement_not_native_v01_wrapper(self):
+        workflow = yaml.safe_load((ROOT / '.github/workflows/release.yml').read_text())
+        steps = workflow['jobs']['build-sign-attest']['steps']
+        step = next(s for s in steps if s.get('name') == 'attest SLSA provenance (cosign)')
+        self.assertIn('cosign attest-blob', step['run'])
+        self.assertIn('--statement', step['run'])
+        self.assertIn('https://in-toto.io/Statement/v1', step['run'])
+
     def test_skip_github_writer_also_skips_github_verifier(self):
         workflow = yaml.safe_load((ROOT / '.github/workflows/release.yml').read_text())
         steps = workflow['jobs']['verify']['steps']

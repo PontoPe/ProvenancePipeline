@@ -22,6 +22,11 @@ on:
         type: boolean
         default: false
 
+# A fallback index is read/modify/write; serialize all writers per ref.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -226,7 +231,16 @@ jobs:
       - name: attest SLSA provenance (cosign)
         env:
           REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
-        run: cosign attest --yes --bundle provenance.bundle.json --type slsaprovenance1 --predicate provenance.json "$REF"
+        run: |
+          set -euo pipefail
+          # Native image attest wraps SLSA v1 in Statement/v0.1 on Cosign 3.1.4.
+          # Keep the strict v1 contract: sign our explicit statement instead.
+          jq -n --arg name "${REF%@*}" --arg digest "${REF##*@sha256:}" \
+            --slurpfile predicate provenance.json \
+            '{_type: "https://in-toto.io/Statement/v1",
+              subject: [{name: $name, digest: {sha256: $digest}}],
+              predicateType: "https://slsa.dev/provenance/v1", predicate: $predicate[0]}' > provenance.statement.json
+          cosign attest-blob --yes --bundle provenance.bundle.json --statement provenance.statement.json
 
       - name: install checksum-verified ORAS
         run: |
