@@ -6,3 +6,7 @@ cosign.pub
 .env
 kubeconfig
 cluster/bootstrap/upstream/
+__pycache__/
+*.py[cod]
+.venv/
+.lab/

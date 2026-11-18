@@ -1,0 +1,26 @@
+Loading test  ( tests/kyverno-test.yaml ) ...
+  Loading values/variables ...
+  Loading policies ...
+  Warning: policies/kyverno/verify-images.yaml: kyverno.io/v1 ClusterPolicy is deprecated and will be removed in a future release; migrate to ValidatingPolicy, MutatingPolicy, GeneratingPolicy or ImageValidatingPolicy (policies.kyverno.io), see https://kyverno.io/docs/guides/migration-to-cel/
+  Loading resources ...
+  Loading exceptions ...
+  Applying 1 policy to 5 resources with 0 exceptions ...
+  Checking results ...
+
+│────│───────────────────│──────────────────────────────────────│──────────────────────────────────────────────────────────│────────│──────────│
+│ [40;32mID[0m │ [40;32mPOLICY           [0m │ [40;32mRULE                                [0m │ [40;32mRESOURCE                                                [0m │ [40;32mRESULT[0m │ [40;32mREASON  [0m │
+│────│───────────────────│──────────────────────────────────────│──────────────────────────────────────────────────────────│────────│──────────│
+│ 1  │ verify-provenance │ verify-own-images                    │ v1/Pod/provenance-demo/signed-digest                     │ Pass   │ Ok       │
+│ 2  │ verify-provenance │ verify-own-images                    │ v1/Pod/provenance-demo/signed-digest                     │ Pass   │ Ok       │
+│ 3  │ verify-provenance │ verify-own-images                    │ v1/Pod/default/signed-digest-other-namespace             │ Pass   │ Ok       │
+│ 4  │ verify-provenance │ verify-own-images                    │ v1/Pod/default/signed-digest-other-namespace             │ Pass   │ Ok       │
+│ 5  │ verify-provenance │ deny-unsigned-in-enforced-namespaces │ v1/Pod/provenance-demo/unsigned-third-party              │ Pass   │ Ok       │
+│ 6  │ verify-provenance │ deny-unsigned-in-enforced-namespaces │ v1/Pod/provenance-demo/unsigned-third-party              │ Pass   │ Ok       │
+│ 7  │ verify-provenance │ deny-unsigned-in-enforced-namespaces │ v1/Pod/provenance-demo/signed-by-another-identity        │ Pass   │ Ok       │
+│ 8  │ verify-provenance │ deny-unsigned-in-enforced-namespaces │ v1/Pod/provenance-demo/signed-by-another-identity        │ Pass   │ Ok       │
+│ 9  │ verify-provenance │ deny-unsigned-in-enforced-namespaces │ v1/Pod/default/unsigned-third-party-unenforced-namespace │ Pass   │ Excluded │
+│────│───────────────────│──────────────────────────────────────│──────────────────────────────────────────────────────────│────────│──────────│
+
+
+Test Summary: 9 tests passed and 0 tests failed
+

@@ -42,6 +42,51 @@ The path from source commit to a running container: CI build, SBOM, scan, signin
 - It does not prove the code is safe — only that it came from the expected builder and source.
 - SLSA level reached is documented honestly in the README rather than claimed.
 
+## Offline follow-up: local contracts, not new live controls
+
+`make offline-test` and `make offline-policy-check` now exercise a local exact-spec
+drift contract, including removed/relaxed synthetic policies. An exported policy
+can be checked without trusting its `status`, but this does not establish export
+freshness, installed webhook configuration, PolicyExceptions, namespace labels or
+actual admission behavior. There is still no deployed independent observer.
+
+The publication-content checker binds decoded own-writer statements to the exact
+image digest, builder, workflow and source revision. It **does not authenticate**
+the input or check the issuer; trusted signature/certificate verification with
+both exact identity and issuer must precede it. It is not enabled in release CI,
+and cannot close T9/B5. Details and the unexecuted compatibility matrix are in
+[offline-verification.md](offline-verification.md). No trust pins, policy scope,
+failure behavior or SLSA claim were changed by this milestone.
+
+## Live follow-up: residual operational findings
+
+The [2026-11-17 disposable-lab investigation](evidence/b5-investigation-2026-11-17.md)
+revalidated the baseline and negative admissions, but did not close T9/B5.
+An endpoint-disconnected webhook failed closed; scaling its deployment to zero
+admitted an unsigned dry-run instead. Graceful shutdown/registration is a
+different failure mode and must not be represented as fail-closed. The exact-spec
+checker also rejects healthy API-defaulted exports, so it is not yet a usable
+live drift observer. Own-proof-only publication, registry cache/outage behavior,
+and the required release publication gate remain unproven.
+
+## Candidate own-publication gate (not yet consumer-proven)
+
+The release candidate republishes unchanged Cosign 3.1.4 Sigstore bundle bytes
+using checksum-pinned ORAS 1.4.0 and an explicit bundle artifactType in GHCR's
+fallback index. Required readback checks bind the descriptor, manifest and bundle
+bytes; Cosign then verifies the exact identity/issuer and the own-content contract
+binds image digest and source revision. A separate clean runner verifies content
+again. The optional GitHub writer now runs only on explicit opt-in dispatch and
+AFTER both required jobs, so it cannot hide a missing own proof. PR jobs have no
+publication/OIDC write permissions. Main-only publishing preserves the admission
+identity; tagging a release no longer publishes under an untrusted tag identity.
+
+These are candidate controls, not evidence of Kyverno compatibility. T9/B5 stays
+open until actual own-only admission and workload health are captured. Registry
+metadata is not trusted as authenticity; original bundle signatures are retained.
+Sequential fallback-index writes avoid races within this publisher, but another
+writer can still race it; required final-index readback rejects missing entries.
+
 ## Verification
 
 Both the allow path and the deny path have tests (`make policy-test`), and the deny path is the recorded demo.

@@ -1,0 +1,29 @@
+test_descriptor_must_be_discoverable_and_bound (test_bundle_publication.BundlePublicationTests.test_descriptor_must_be_discoverable_and_bound) ... ERROR
+test_verified_ndjson_decoder (test_bundle_publication.BundlePublicationTests.test_verified_ndjson_decoder) ... ERROR
+
+======================================================================
+ERROR: test_descriptor_must_be_discoverable_and_bound (test_bundle_publication.BundlePublicationTests.test_descriptor_must_be_discoverable_and_bound)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/pontope/Coding/ProvenancePipeline/tests/offline/test_bundle_publication.py", line 15, in setUp
+    spec.loader.exec_module(self.module)
+  File "<frozen importlib._bootstrap_external>", line 936, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1073, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1130, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: '/home/pontope/Coding/ProvenancePipeline/scripts/bundle_publication.py'
+
+======================================================================
+ERROR: test_verified_ndjson_decoder (test_bundle_publication.BundlePublicationTests.test_verified_ndjson_decoder)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/pontope/Coding/ProvenancePipeline/tests/offline/test_bundle_publication.py", line 15, in setUp
+    spec.loader.exec_module(self.module)
+  File "<frozen importlib._bootstrap_external>", line 936, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1073, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1130, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: '/home/pontope/Coding/ProvenancePipeline/scripts/bundle_publication.py'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (errors=2)

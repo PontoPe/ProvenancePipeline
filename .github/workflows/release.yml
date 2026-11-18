@@ -9,7 +9,14 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
+    inputs:
+      skip_github_writer:
+        description: Prove own-only publication (no GitHub attestation writer)
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -30,8 +37,15 @@ jobs:
       - name: test
         run: go test -race ./...
         working-directory: app
+      - name: offline publication contracts
+        run: |
+          python3 -m pip install --require-hashes -r tests/offline/requirements.txt
+          make offline-test offline-policy-check
 
   build-sign-attest:
+    # Only the main-branch identity is trusted by admission. Tags/branch dispatch
+    # may test source, but must not replace the trusted release's mutable tags.
+    if: github.ref == 'refs/heads/main'
     name: build, sign, attest
     needs: test
     runs-on: ubuntu-latest
@@ -129,24 +143,23 @@ jobs:
           severity-cutoff: critical
           output-format: table
 
-      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # bootstrap v3.1.4
+        with:
+          cosign-release: v3.1.4
 
       - name: sign image (keyless)
         env:
           REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
-        run: cosign sign --yes "$REF"
+        run: cosign sign --yes --bundle signature.bundle.json "$REF"
 
       - name: attest SBOM (SPDX)
         env:
           REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
-        run: cosign attest --yes --type spdxjson --predicate sbom.spdx.json "$REF"
+        run: cosign attest --yes --bundle sbom.bundle.json --type spdxjson --predicate sbom.spdx.json "$REF"
 
-      # A second, cosign-native provenance attestation on top of
-      # actions/attest-build-provenance below. Reason: this repository is private,
-      # so GitHub's attestation is issued by its internal Sigstore instance and is
-      # only verifiable with `gh attestation verify`. Kyverno speaks cosign, not
-      # gh — so the copy the cluster will actually enforce has to live in public
-      # Rekor. ADR-005.
+      # Own provenance is mandatory. ADR-009 records why Cosign's fallback-index
+      # descriptors were invisible to Kyverno; publish unchanged signed bytes
+      # with an explicit bundle artifactType before any optional GitHub writer.
       - name: build SLSA provenance predicate
         env:
           REPOSITORY: ${{ github.repository }}
@@ -209,20 +222,36 @@ jobs:
       - name: attest SLSA provenance (cosign)
         env:
           REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
-        run: cosign attest --yes --type slsaprovenance1 --predicate provenance.json "$REF"
+        run: cosign attest --yes --bundle provenance.bundle.json --type slsaprovenance1 --predicate provenance.json "$REF"
 
-      # Skipped while the repository is private: the attestations API answers
-      # "Feature not available for user-owned private repositories". This is a
-      # platform limit, not a relaxed control — the cosign slsaprovenance1
-      # attestation above is the SLSA provenance this project actually depends
-      # on, and unlike this one it is verifiable from public Rekor by Kyverno.
-      - name: attest build provenance (GitHub)
-        if: steps.meta.outputs.private != 'true'
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+      - name: install checksum-verified ORAS
+        run: |
+          set -euo pipefail
+          curl -fsSLo oras.tar.gz https://github.com/oras-project/oras/releases/download/v1.4.0/oras_1.4.0_linux_amd64.tar.gz
+          echo 'd8e1dce2fd8ce996f1d901845b688eb0cf505a6082897606f053825bb47935d1  oras.tar.gz' | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/oras-bin"
+          tar -xzf oras.tar.gz -C "$RUNNER_TEMP/oras-bin" oras
+          echo "$RUNNER_TEMP/oras-bin" >> "$GITHUB_PATH"
+
+      - name: install publication checker dependency
+        run: python3 -m pip install --require-hashes -r tests/offline/requirements.txt
+
+      - name: publish and verify own bundles
+        env:
+          REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
+          IDENTITY: ${{ steps.meta.outputs.identity }}
+          REVISION: ${{ github.sha }}
+        run: bash scripts/publish-bundles.sh
+
+      - name: preserve publication evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          subject-name: ${{ steps.meta.outputs.image }}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+          name: own-publication
+          path: |
+            publication/
+            *.bundle.json
+          if-no-files-found: error
 
       - name: upload SBOMs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -247,9 +276,14 @@ jobs:
       IDENTITY: ${{ needs.build-sign-attest.outputs.identity }}
       ISSUER: https://token.actions.githubusercontent.com
     steps:
-      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: install verification dependency
+        run: python3 -m pip install --require-hashes -r tests/offline/requirements.txt
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # bootstrap v3.1.4
+        with:
+          cosign-release: v3.1.4
 
-      # The package is private; cosign reads the docker credential store.
+      # Credentials support private registries; public lab proof is still required.
       - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
         with:
           registry: ghcr.io
@@ -281,14 +315,16 @@ jobs:
             --certificate-oidc-issuer "$ISSUER" \
             "$REF" | jq -r '.payload | @base64d | fromjson | .predicate'
 
-      - name: verify GitHub build provenance
-        if: needs.build-sign-attest.result == 'success' && github.event.repository.private != true
+      - name: verify own publication content
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REVISION: ${{ github.sha }}
         run: |
-          gh attestation verify "oci://$REF" \
-            --repo "${{ github.repository }}" \
-            --signer-workflow "${{ github.repository }}/.github/workflows/release.yml"
+          set -euo pipefail
+          timeout 180 cosign verify-attestation --type slsaprovenance1 \
+            --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" \
+            "$REF" > own-verified.ndjson
+          python3 scripts/bundle_publication.py decode own-verified.ndjson > own-statements.json
+          python3 scripts/offline_checks.py publication own-statements.json --ref "$REF" --revision "$REVISION"
 
       # A tampered digest must fail. Without this the verify job only proves the
       # happy path, and a verifier that never says no is not a verifier.
@@ -420,3 +456,34 @@ jobs:
           path: |
             evidence.md
             rekor-entries.txt
+
+  optional-github-proof:
+    # Never let the redundant writer mask missing own provenance in either runner.
+    needs: [build-sign-attest, verify]
+    if: github.event_name == 'workflow_dispatch' && inputs.skip_github_writer == false && github.event.repository.private != true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4.5.2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: attest build provenance (GitHub)
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-name: ${{ needs.build-sign-attest.outputs.image }}
+          subject-digest: ${{ needs.build-sign-attest.outputs.digest }}
+          push-to-registry: true
+      - name: verify GitHub build provenance
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{ needs.build-sign-attest.outputs.image }}@${{ needs.build-sign-attest.outputs.digest }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh attestation verify "oci://$REF" --repo "$REPOSITORY" \
+            --signer-workflow "$REPOSITORY/.github/workflows/release.yml"

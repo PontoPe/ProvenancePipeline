@@ -56,8 +56,11 @@ Not done:
 
 - **B5, the important one.** Enforcement depends on the repo staying public,
   because `actions/attest-build-provenance` is gated on visibility and writes the
-  only bundle Kyverno can see. Fix by pinning cosign 2.x in CI so the legacy
-  layout is published too. See `docs/BLOCKED.md` B5.
+  only bundle Kyverno can see in the recorded experiment. The Cosign 2.x legacy
+  writer is a historical workaround, not an approved downgrade. Check current
+  support/advisories and run the publisher/layout/consumer experiment before
+  choosing a solution. See `docs/BLOCKED.md` B5 and
+  `docs/offline-verification.md` for the local contract checks and pending proof.
 - B2 — Docker Desktop still does not start unattended.
 - Scheduled re-scan of published digests for new CVEs.
 

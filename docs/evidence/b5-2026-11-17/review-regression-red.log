@@ -1,0 +1,29 @@
+EFF
+======================================================================
+ERROR: test_descriptor_must_be_discoverable_and_bound (test_bundle_publication.BundlePublicationTests.test_descriptor_must_be_discoverable_and_bound)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/pontope/Coding/ProvenancePipeline/tests/offline/test_bundle_publication.py", line 43, in test_descriptor_must_be_discoverable_and_bound
+    self.module.check_descriptor(index, manifest, manifest_digest, digest, bundle_digest, 100, 200)
+TypeError: check_descriptor() takes 5 positional arguments but 7 were given
+
+======================================================================
+FAIL: test_verified_ndjson_decoder (test_bundle_publication.BundlePublicationTests.test_verified_ndjson_decoder) (bad='{"payloadType":"foreign","payloadType":"application/vnd.in-toto+json","payload":"e30="}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/pontope/Coding/ProvenancePipeline/tests/offline/test_bundle_publication.py", line 28, in test_verified_ndjson_decoder
+    with self.subTest(bad=bad), self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_verified_ndjson_decoder (test_bundle_publication.BundlePublicationTests.test_verified_ndjson_decoder) (bad='{"payloadType": "application/vnd.in-toto+json", "payload": "eyJzdWJqZWN0IjpbXSwic3ViamVjdCI6W3t9XX0="}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/pontope/Coding/ProvenancePipeline/tests/offline/test_bundle_publication.py", line 28, in test_verified_ndjson_decoder
+    with self.subTest(bad=bad), self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.003s
+
+FAILED (failures=2, errors=1)

@@ -1,0 +1,44 @@
+[
+  {
+    "case": "baseline-healthy-proof",
+    "passed": true,
+    "rc": 0,
+    "expected_admit": true,
+    "required_reason": ""
+  },
+  {
+    "case": "tag-denied",
+    "passed": true,
+    "rc": 1,
+    "expected_admit": false,
+    "required_reason": "missing digest"
+  },
+  {
+    "case": "unsigned-denied",
+    "passed": true,
+    "rc": 1,
+    "expected_admit": false,
+    "required_reason": "no matching signatures"
+  },
+  {
+    "case": "wrong-identity-denied",
+    "passed": true,
+    "rc": 1,
+    "expected_admit": false,
+    "required_reason": "no matching signatures"
+  },
+  {
+    "case": "wrong-issuer-denied",
+    "passed": true,
+    "rc": 1,
+    "expected_admit": false,
+    "required_reason": "no matching signatures"
+  },
+  {
+    "case": "bad-predicate-denied",
+    "passed": true,
+    "rc": 1,
+    "expected_admit": false,
+    "required_reason": ""
+  }
+]

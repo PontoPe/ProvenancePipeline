@@ -8,6 +8,14 @@ Software supply-chain pipeline: build → SBOM → vulnerability scan → keyles
 > Captured proof:
 > [supply-chain-verification.md](docs/evidence/supply-chain-verification.md) (CI)
 > and [admission-enforcement.md](docs/evidence/admission-enforcement.md) (cluster).
+>
+> **Offline follow-up:** `make offline-test` and `make offline-policy-check` check
+> local publication-content and policy-spec contracts, not live enforcement.
+> [Reproduction, results and compatibility experiment](docs/offline-verification.md).
+> B5 remains open. The admission policy is unchanged; a patched Cosign pin is
+> prepared on `fix/b5-own-proof`. GitHub authorization was refreshed after the
+> initial rejected push; B5 implementation and live acceptance remain pending.
+> [Live investigation and unresolved findings](docs/evidence/b5-investigation-2026-11-17.md).
 
 ---
 
