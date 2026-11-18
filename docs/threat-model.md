@@ -69,6 +69,24 @@ checker also rejects healthy API-defaulted exports, so it is not yet a usable
 live drift observer. Own-proof-only publication, registry cache/outage behavior,
 and the required release publication gate remain unproven.
 
+## Candidate own-publication gate (not yet consumer-proven)
+
+The release candidate republishes unchanged Cosign 3.1.4 Sigstore bundle bytes
+using checksum-pinned ORAS 1.4.0 and an explicit bundle artifactType in GHCR's
+fallback index. Required readback checks bind the descriptor, manifest and bundle
+bytes; Cosign then verifies the exact identity/issuer and the own-content contract
+binds image digest and source revision. A separate clean runner verifies content
+again. The optional GitHub writer now runs only on explicit opt-in dispatch and
+AFTER both required jobs, so it cannot hide a missing own proof. PR jobs have no
+publication/OIDC write permissions. Main-only publishing preserves the admission
+identity; tagging a release no longer publishes under an untrusted tag identity.
+
+These are candidate controls, not evidence of Kyverno compatibility. T9/B5 stays
+open until actual own-only admission and workload health are captured. Registry
+metadata is not trusted as authenticity; original bundle signatures are retained.
+Sequential fallback-index writes avoid races within this publisher, but another
+writer can still race it; required final-index readback rejects missing entries.
+
 ## Verification
 
 Both the allow path and the deny path have tests (`make policy-test`), and the deny path is the recorded demo.
