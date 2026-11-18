@@ -6,8 +6,8 @@
 # same argument that makes the admission policy refuse tags applies to what this
 # pipeline consumes. See ADR-002 in docs/architecture.md.
 
-# golang:1.26-alpine
-ARG GO_IMAGE=golang@sha256:0178a641fbb4858c5f1b48e34bdaabe0350a330a1b1149aabd498d0699ff5fb2
+# golang:1.26.11-alpine (official manifest resolved 2026-11-18; patches Go stdlib CVEs)
+ARG GO_IMAGE=golang@sha256:ecb67f987aa1a57794c91d19ade7ae0209f2f0f5496aaef9e6ae85ddf92d02ab
 # gcr.io/distroless/static-debian12:nonroot
 ARG RUNTIME_IMAGE=gcr.io/distroless/static-debian12@sha256:f5b485ea962d9bd1186b2f6b3a061191539b905b82ec395de78cbfae51f20e35
 

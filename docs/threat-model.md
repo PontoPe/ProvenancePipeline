@@ -87,6 +87,28 @@ metadata is not trusted as authenticity; original bundle signatures are retained
 Sequential fallback-index writes avoid races within this publisher, but another
 writer can still race it; required final-index readback rejects missing entries.
 
+## Reviewed lab-export contract
+
+For Kyverno v1.19.2 only, `policy --kyverno119-export` requires the exact
+API-defaulted spec fingerprint
+`360db442cc0ad27dbdddcf0af709b7855c35f135f568c5c651cef348856cb45c`.
+This is the original reviewed spec plus `admission: true`, `emitWarning: false`,
+`validationFailureAction: Audit`, each rule's `skipBackgroundRequests: true`,
+each image verifier's `useCache: true`, and every attestor entry's
+`signatureAlgorithm: sha256`. Rule-level `failureAction: Enforce` remains required
+and overrides the deprecated top-level Audit default. No fields are removed or
+normalized. The original fingerprint/mode is unchanged. Tests construct these
+exact additions independently and reject mutations, removals and unknown fields.
+A different controller version requires review, not automatic relearning.
+
+`scripts/check_enforcement.py` freshly exports the named policy and namespace,
+then requires a signature-verification denial for an unsigned server-side Pod
+dry-run. `tests/integration/observer-rbac.yaml` allows only target policy/namespace
+GET and Pod CREATE in `prove-lab`; Kubernetes RBAC cannot limit CREATE to dry-run.
+It cannot change policies/webhooks/controllers. Lab impersonation uses an admin
+transport; a deployed observer would need its own restricted credential. This is
+a one-shot checker, not a provisioned continuous alerting service.
+
 ## Verification
 
 Both the allow path and the deny path have tests (`make policy-test`), and the deny path is the recorded demo.

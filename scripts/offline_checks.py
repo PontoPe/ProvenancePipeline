@@ -10,6 +10,9 @@ import yaml
 # Reviewed spec at c22c13b65799c3d57fe192d4bd8d3c57716550e4.
 # Intentionally independent of the input: changing the candidate cannot bless it.
 POLICY_SPEC_SHA256 = "819132b1c4cddc0327672bec67483ca3f577f7dd93ed6619477bd2438ee9840f"
+# Same spec with ONLY v1.19.2's reviewed API defaults. No fields are stripped;
+# every addition/value remains fingerprinted, including per-rule Enforce.
+KYVERNO119_EXPORT_SHA256 = "360db442cc0ad27dbdddcf0af709b7855c35f135f568c5c651cef348856cb45c"
 
 
 class UniqueLoader(yaml.SafeLoader):
@@ -29,7 +32,7 @@ def unique_mapping(loader, node):
 UniqueLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, unique_mapping)
 
 
-def check_policy(path):
+def check_policy(path, kyverno119_export=False):
     policy = yaml.load(Path(path).read_text(), Loader=UniqueLoader)
     if isinstance(policy, dict) and policy.get("kind") == "List":
         candidates = [p for p in policy.get("items", []) if isinstance(p, dict)
@@ -45,7 +48,8 @@ def check_policy(path):
     ):
         raise ValueError("expected ClusterPolicy verify-provenance")
     actual = hashlib.sha256(json.dumps(policy["spec"], sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
-    if actual != POLICY_SPEC_SHA256:
+    expected = KYVERNO119_EXPORT_SHA256 if kyverno119_export else POLICY_SPEC_SHA256
+    if actual != expected:
         raise ValueError("policy spec drift: reviewed contract differs")
     return {"status": "policy-contract-valid", "live_enforcement_proven": False, "spec_sha256": actual}
 
@@ -122,6 +126,8 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     policy = commands.add_parser("policy", help="check local policy or exported List against reviewed spec")
     policy.add_argument("path", type=Path)
+    policy.add_argument("--kyverno119-export", action="store_true",
+                        help="require exact reviewed v1.19.2 API-defaulted spec")
     publication = commands.add_parser("publication", help="check decoded own-writer statement content, NOT authenticity")
     publication.add_argument("path", type=Path)
     publication.add_argument("--ref", required=True)
@@ -130,7 +136,7 @@ def main():
     args = parser.parse_args()
     try:
         if args.command == "policy":
-            result = check_policy(args.path)
+            result = check_policy(args.path, kyverno119_export=args.kyverno119_export)
         elif args.command == "publication":
             result = check_publication(args.path, args.ref, args.revision)
         else:
