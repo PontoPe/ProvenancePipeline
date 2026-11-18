@@ -109,6 +109,25 @@ It cannot change policies/webhooks/controllers. Lab impersonation uses an admin
 transport; a deployed observer would need its own restricted credential. This is
 a one-shot checker, not a provisioned continuous alerting service.
 
+## Statement-version compatibility finding
+
+Real release `44207607809` passed scanning, descriptor/byte readback and Cosign
+cryptographic verification, then correctly FAILED the strict content gate:
+Cosign 3.1.4 native image `attest --type slsaprovenance1` wrapped the predicate in
+`Statement/v0.1`. The checker still requires `Statement/v1`; it was not relaxed.
+The corrected publisher builds the explicit v1 statement with the exact image
+name/digest and uses supported `cosign attest-blob --statement` to sign it before
+ORAS publication. Image `attest --statement` is not a substitute: the tested
+binary accepts the flag but its image command still requires a predicate.
+
+The native repackaged proof from that failed run nevertheless admitted and became
+healthy in the dedicated lab without GitHub's writer. This proves the layout
+candidate on the consumer, but does not make the failed release green. Final
+proof must use the corrected v1 publisher and a passing exact-head release.
+Intentionally invalid fixtures use only opt-in b5-* tags: native-layout-only
+correct proof (CLI verifies, consumer should deny), wrong-subject signatures, and
+correctly signed but wrong-repository predicates. None is a runnable release.
+
 ## Verification
 
 Both the allow path and the deny path have tests (`make policy-test`), and the deny path is the recorded demo.
