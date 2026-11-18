@@ -21,7 +21,7 @@ for kind in cosignonly wrongdigest badpredicate; do
   target="$image@$digest"
   printf '%s\n' "$target" > "$kind/ref.txt"
   if [[ "$kind" == cosignonly ]]; then
-    # Correct own signature/provenance, deliberately retain the native invisible layout.
+    # Native Cosign compatibility control; maintained 3.1.4 layout is discoverable.
     timeout 180 cosign sign --yes --bundle "$kind/signature.bundle.json" "$target"
     timeout 180 cosign attest --yes --type slsaprovenance1 --predicate good-predicate.json \
       --bundle "$kind/provenance.bundle.json" "$target"
