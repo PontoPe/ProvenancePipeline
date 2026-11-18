@@ -1,0 +1,24 @@
+build, sign, attest	publish and verify own bundles	﻿2026-11-18T00:27:57.6695513Z ##[group]Run bash scripts/publish-bundles.sh
+build, sign, attest	publish and verify own bundles	2026-11-18T00:27:57.6695837Z [36;1mbash scripts/publish-bundles.sh[0m
+build, sign, attest	publish and verify own bundles	2026-11-18T00:27:57.6739037Z shell: /usr/bin/bash -e {0}
+build, sign, attest	publish and verify own bundles	2026-11-18T00:27:57.6739249Z env:
+build, sign, attest	publish and verify own bundles	2026-11-18T00:27:57.6739963Z   REF: ghcr.io/pontope/provenancepipeline@sha256:7a3184906e112ab65ec223b148855b72bb6b5cde3d28a36a0ca7a03288cadbe8
+build, sign, attest	publish and verify own bundles	2026-11-18T00:27:57.6740657Z   IDENTITY: https://github.com/PontoPe/ProvenancePipeline/.github/workflows/release.yml@refs/heads/main
+build, sign, attest	publish and verify own bundles	2026-11-18T00:27:57.6741069Z   REVISION: 50b06833120b0d00005c3f12fa3f982cc5fcfcce
+build, sign, attest	publish and verify own bundles	2026-11-18T00:27:57.6741312Z ##[endgroup]
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:07.7477172Z {"consumer_compatibility_proven": false, "cryptographic_verification_performed": false, "status": "layout-valid"}
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:07.7881457Z {"consumer_compatibility_proven": false, "cryptographic_verification_performed": false, "status": "layout-valid"}
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:07.8274932Z {"consumer_compatibility_proven": false, "cryptographic_verification_performed": false, "status": "layout-valid"}
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:11.1971299Z 
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:11.1972203Z Verification for ghcr.io/pontope/provenancepipeline@sha256:7a3184906e112ab65ec223b148855b72bb6b5cde3d28a36a0ca7a03288cadbe8 --
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:11.1972780Z The following checks were performed on each of these signatures:
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:11.1973080Z   - The cosign claims were validated
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:11.1973406Z   - Existence of the claims in the transparency log was verified offline
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:11.1973834Z   - The code-signing certificate was verified using trusted certificate authority certificates
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:14.9728410Z 
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:14.9729115Z Verification for ghcr.io/pontope/provenancepipeline@sha256:7a3184906e112ab65ec223b148855b72bb6b5cde3d28a36a0ca7a03288cadbe8 --
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:14.9730018Z The following checks were performed on each of these signatures:
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:14.9730443Z   - The cosign claims were validated
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:14.9730850Z   - Existence of the claims in the transparency log was verified offline
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:14.9731503Z   - The code-signing certificate was verified using trusted certificate authority certificates
+build, sign, attest	publish and verify own bundles	2026-11-18T00:28:15.0719979Z ##[error]Process completed with exit code 1.

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "apply",
+    "-f",
+    "-"
+  ],
+  "rc": 0,
+  "seconds": 0.08923373185098171,
+  "stdout": "clusterpolicy.kyverno.io/verify-provenance created\n",
+  "stderr": "Warning: kyverno.io/v1 ClusterPolicy is deprecated and will be removed in a future release; migrate to ValidatingPolicy, MutatingPolicy, GeneratingPolicy or ImageValidatingPolicy (policies.kyverno.io), see https://kyverno.io/docs/guides/migration-to-cel/\n"
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "case": "own-native",
+    "passed": true,
+    "expected_admit": true,
+    "required_reason": "",
+    "rc": 0
+  }
+]

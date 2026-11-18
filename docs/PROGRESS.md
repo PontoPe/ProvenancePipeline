@@ -1,5 +1,22 @@
 # PROGRESS — cluster-side enforcement
 
+## Current follow-up (2026-11-18 UTC)
+
+See [own-proof live evidence](evidence/b5-own-proof-2026-11-18.md): main release
+44209229722 succeeded with the optional GitHub writer skipped. Actual own v1
+image admitted and healthy; signed wrongdigest/badpredicate, tag/unsigned,
+identity/issuer pins, drift and distinct registry/webhook faults exercised.
+Dedicated lab destroyed. Final independent operational review passed on head
+`87c57b3f719792f814065c665a80680102445f1d`: 19 offline tests, Go vet/race,
+preserved descriptor/bundle bindings and the admission/outage evidence checked.
+The reviewer did not recreate the cluster or repeat online crypto verification.
+Follow-up edits clarify cold versus warm outage errors, observer scope and the
+disposable-lab cleanup limitation; no runtime behavior changed.
+The native Cosign3.1.4 fixture also admitted with corrected remote descriptors;
+July's3.1.2-only discovery conclusion is historical, not a current-version limit.
+
+The remainder records the original KateClusters experiment, not a current host.
+
 Source of truth for what is done and verified. Updated after every numbered step.
 If a step is marked done here, do not redo it — confirm the state with the listed
 command and move on.

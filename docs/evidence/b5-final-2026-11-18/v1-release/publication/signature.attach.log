@@ -1,0 +1,7 @@
+Preparing signature.bundle.json
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Exists    4ccb473f3db2 signature.bundle.json
+Uploading 8064c7552009 application/vnd.oci.image.manifest.v1+json
+Uploaded  8064c7552009 application/vnd.oci.image.manifest.v1+json
+Attached to [registry] ghcr.io/pontope/provenancepipeline@sha256:ba656a50370cd2e5151e6172f562535ae331b336b04974828931cb402c6b0133
+Digest: sha256:8064c75520094c0e8c9974f334204aeb65a56b0c183278f10ed567403216503a

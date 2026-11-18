@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "-n",
+    "kyverno",
+    "rollout",
+    "restart",
+    "deploy/kyverno-admission-controller"
+  ],
+  "rc": 0,
+  "seconds": 0.0536759658716619,
+  "stdout": "deployment.apps/kyverno-admission-controller restarted\n",
+  "stderr": ""
+}

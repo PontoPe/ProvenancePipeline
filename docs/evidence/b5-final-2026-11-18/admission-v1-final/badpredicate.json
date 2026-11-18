@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 1,
+  "seconds": 6.7345325611531734,
+  "stdout": "",
+  "stderr": "Error from server: error when creating \"STDIN\": admission webhook \"mutate.kyverno.svc-fail\" denied the request: \n\nresource Pod/prove-lab/badpredicate was blocked due to the following policies \n\nverify-provenance:\n  verify-own-images: 'image attestations verification failed, verifiedCount: 0, requiredCount: 1, error: .attestations[0].attestors[0].entries[0].keyless: attestation checks failed for ghcr.io/pontope/provenancepipeline@sha256:e32e961d471f6de7522c658e2e4214001b78ef35bb3883858f73dd38353c85c0 and predicate https://slsa.dev/provenance/v1: '\n"
+}

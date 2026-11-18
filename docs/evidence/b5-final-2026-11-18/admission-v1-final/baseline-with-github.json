@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 0,
+  "seconds": 4.59522185404785,
+  "stdout": "pod/baseline-with-github created (server dry run)\n",
+  "stderr": ""
+}

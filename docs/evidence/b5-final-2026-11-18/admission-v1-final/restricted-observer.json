@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "python3",
+    "/home/pontope/Coding/ProvenancePipeline/scripts/check_enforcement.py",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--out",
+    ".lab/round2/admission-v1-final/observer"
+  ],
+  "rc": 0,
+  "seconds": 0.9125286950729787,
+  "stdout": "{\"status\": \"enforcement-observed\", \"scope\": \"current spec and unsigned dry-run in prove-lab\", \"continuous_monitoring\": false}\n",
+  "stderr": ""
+}

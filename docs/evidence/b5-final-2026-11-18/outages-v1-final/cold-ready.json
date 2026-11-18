@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "-n",
+    "kyverno",
+    "rollout",
+    "status",
+    "deploy/kyverno-admission-controller",
+    "--timeout=120s"
+  ],
+  "rc": 0,
+  "seconds": 25.52590820612386,
+  "stdout": "Waiting for deployment \"kyverno-admission-controller\" rollout to finish: 1 old replicas are pending termination...\nWaiting for deployment \"kyverno-admission-controller\" rollout to finish: 1 old replicas are pending termination...\ndeployment \"kyverno-admission-controller\" successfully rolled out\n",
+  "stderr": ""
+}

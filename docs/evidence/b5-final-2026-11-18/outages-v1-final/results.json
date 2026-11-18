@@ -1,0 +1,93 @@
+[
+  {
+    "case": "absent-policy-control-0",
+    "passed": true,
+    "expected_admit": true,
+    "required_reason": "",
+    "rc": 0
+  },
+  {
+    "case": "webhook-outage",
+    "passed": true,
+    "expected_admit": false,
+    "required_reason": "failed calling webhook",
+    "rc": 1
+  },
+  {
+    "case": "webhook-recovered-0",
+    "passed": true,
+    "expected_admit": false,
+    "required_reason": "no matching signatures",
+    "rc": 1
+  },
+  {
+    "case": "warmup-0",
+    "passed": false,
+    "expected_admit": true,
+    "required_reason": "",
+    "rc": 1
+  },
+  {
+    "case": "warmup-1",
+    "passed": false,
+    "expected_admit": true,
+    "required_reason": "",
+    "rc": 1
+  },
+  {
+    "case": "warmup-2",
+    "passed": true,
+    "expected_admit": true,
+    "required_reason": "",
+    "rc": 0
+  },
+  {
+    "case": "registry-warm-webhook-control",
+    "passed": true,
+    "expected_admit": false,
+    "required_reason": "no matching signatures",
+    "rc": 1
+  },
+  {
+    "case": "registry-expired-webhook-control",
+    "passed": true,
+    "expected_admit": false,
+    "required_reason": "no matching signatures",
+    "rc": 1
+  },
+  {
+    "case": "cold-webhook-control-0",
+    "passed": true,
+    "expected_admit": false,
+    "required_reason": "no matching signatures",
+    "rc": 1
+  },
+  {
+    "case": "registry-cold-webhook-control",
+    "passed": true,
+    "expected_admit": false,
+    "required_reason": "no matching signatures",
+    "rc": 1
+  },
+  {
+    "case": "registry-recovered-0",
+    "passed": false,
+    "expected_admit": true,
+    "required_reason": "",
+    "rc": 1
+  },
+  {
+    "case": "registry-recovered-1",
+    "passed": false,
+    "expected_admit": true,
+    "required_reason": "",
+    "rc": 1
+  },
+  {
+    "case": "registry-recovered-2",
+    "passed": true,
+    "expected_admit": true,
+    "required_reason": "",
+    "rc": 0
+  }
+]

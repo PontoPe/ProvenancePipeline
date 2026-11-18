@@ -1,5 +1,11 @@
 # Offline verification milestone
 
+Current live follow-up: [own-proof experiment](evidence/b5-own-proof-2026-11-18.md).
+Exact-head release44209229722 passed; own v1 proof admitted healthy without the
+GitHub writer, with actual signed-negative and outage/drift results. Final
+independent operational review remains pending. This document is historical;
+its original not-run declarations must not be read as the latest live state.
+
 > Historical offline milestone below. A subsequent authorized live baseline run
 > is recorded in [the 2026-11-17 investigation](evidence/b5-investigation-2026-11-17.md).
 > The suite now has 13 tests; a patched Cosign workflow pin is prepared on a

@@ -1,0 +1,9 @@
+Preparing badpredicate/payload.txt
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Uploading 6815a20ae258 badpredicate/payload.txt
+Uploaded  6815a20ae258 badpredicate/payload.txt
+Uploading e32e961d471f application/vnd.oci.image.manifest.v1+json
+Uploaded  e32e961d471f application/vnd.oci.image.manifest.v1+json
+Pushed [registry] ghcr.io/pontope/provenancepipeline:b5-badpredicate-44209229722
+ArtifactType: application/vnd.provenancepipeline.b5-fixture.v1
+Digest: sha256:e32e961d471f6de7522c658e2e4214001b78ef35bb3883858f73dd38353c85c0

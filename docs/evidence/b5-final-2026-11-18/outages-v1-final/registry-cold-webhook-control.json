@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 1,
+  "seconds": 0.736686185002327,
+  "stdout": "",
+  "stderr": "Error from server: error when creating \"STDIN\": admission webhook \"mutate.kyverno.svc-fail\" denied the request: \n\nresource Pod/prove-lab/registry-cold-webhook-control was blocked due to the following policies \n\nverify-provenance:\n  deny-unsigned-in-enforced-namespaces: 'failed to verify image docker.io/library/busybox@sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec: .attestors[0].entries[0].keyless: sigstore bundle verification failed: no matching signatures found'\n"
+}

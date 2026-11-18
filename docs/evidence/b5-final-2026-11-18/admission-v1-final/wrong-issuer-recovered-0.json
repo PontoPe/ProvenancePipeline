@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 0,
+  "seconds": 12.746900462079793,
+  "stdout": "pod/wrong-issuer-recovered-0 created (server dry run)\n",
+  "stderr": ""
+}

@@ -1,0 +1,9 @@
+Preparing cosignonly/payload.txt
+Uploading fe33695bd70d cosignonly/payload.txt
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Uploaded  fe33695bd70d cosignonly/payload.txt
+Uploading 45802383e88b application/vnd.oci.image.manifest.v1+json
+Uploaded  45802383e88b application/vnd.oci.image.manifest.v1+json
+Pushed [registry] ghcr.io/pontope/provenancepipeline:b5-cosignonly-44209229722
+ArtifactType: application/vnd.provenancepipeline.b5-fixture.v1
+Digest: sha256:45802383e88b0c32736682e46525a300552dfa30cc3567754b6368f163da3548

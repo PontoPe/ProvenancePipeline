@@ -1,0 +1,7 @@
+Preparing wrongdigest/signature.bundle.json
+Exists    4ccb473f3db2 wrongdigest/signature.bundle.json
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Uploading 6bceb0ac7e0e application/vnd.oci.image.manifest.v1+json
+Uploaded  6bceb0ac7e0e application/vnd.oci.image.manifest.v1+json
+Attached to [registry] ghcr.io/pontope/provenancepipeline@sha256:50bf0a2f13d10ddd992c2999ea517a9e12d7bd5db910f2c891ad3cd417964f15
+Digest: sha256:6bceb0ac7e0e94ef651c81efad4de9d3d7e8ce272248b67868634a94ffc84606

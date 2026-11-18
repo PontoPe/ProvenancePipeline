@@ -1,0 +1,1745 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/restartedAt": "2026-11-17T21:49:56-03:00"
+                },
+                "creationTimestamp": "2026-11-18T00:50:26Z",
+                "generateName": "kyverno-admission-controller-7d75466555-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "admission-controller",
+                    "app.kubernetes.io/instance": "kyverno",
+                    "app.kubernetes.io/name": "kyverno-admission-controller",
+                    "app.kubernetes.io/part-of": "kyverno",
+                    "app.kubernetes.io/version": "v1.19.2",
+                    "pod-template-hash": "7d75466555"
+                },
+                "name": "kyverno-admission-controller-7d75466555-b8scm",
+                "namespace": "kyverno",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "kyverno-admission-controller-7d75466555",
+                        "uid": "9cab17a6-11dd-4fc3-8bfb-a0ba2aae9ad2"
+                    }
+                ],
+                "resourceVersion": "8363",
+                "uid": "77d4c304-39e8-4b46-b603-56013ebc211e"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchExpressions": [
+                                            {
+                                                "key": "app.kubernetes.io/component",
+                                                "operator": "In",
+                                                "values": [
+                                                    "admission-controller"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 1
+                            }
+                        ]
+                    }
+                },
+                "automountServiceAccountToken": true,
+                "containers": [
+                    {
+                        "args": [
+                            "--caSecretName=kyverno-svc.kyverno.svc.kyverno-tls-ca",
+                            "--tlsSecretName=kyverno-svc.kyverno.svc.kyverno-tls-pair",
+                            "--tlsKeyAlgorithm=RSA",
+                            "--backgroundServiceAccountName=system:serviceaccount:kyverno:kyverno-background-controller",
+                            "--reportsServiceAccountName=system:serviceaccount:kyverno:kyverno-reports-controller",
+                            "--servicePort=443",
+                            "--webhookServerPort=9443",
+                            "--resyncPeriod=15m",
+                            "--crdWatcher=false",
+                            "--disableMetrics=false",
+                            "--otelConfig=prometheus",
+                            "--metricsPort=8000",
+                            "--admissionReports=true",
+                            "--maxAdmissionReports=1000",
+                            "--autoUpdateWebhooks=true",
+                            "--excludeBootstrapResources=false",
+                            "--enableConfigMapCaching=true",
+                            "--controllerRuntimeMetricsAddress=:8080",
+                            "--enableDeferredLoading=true",
+                            "--dumpPayload=false",
+                            "--forceFailurePolicyIgnore=false",
+                            "--generateValidatingAdmissionPolicy=true",
+                            "--generateMutatingAdmissionPolicy=false",
+                            "--dumpPatches=false",
+                            "--maxAPICallResponseLength=2000000",
+                            "--apiCallTimeout=30s",
+                            "--maxGlobalContextEntries=0",
+                            "--loggingFormat=text",
+                            "--v=2",
+                            "--omitEvents=PolicyApplied,PolicySkipped",
+                            "--enablePolicyException=false",
+                            "--protectManagedResources=false",
+                            "--allowInsecureRegistry=false",
+                            "--registryCredentialHelpers=default,google,amazon,azure,github",
+                            "--enableReporting=validate,mutate,mutateExisting,imageVerify,generate"
+                        ],
+                        "env": [
+                            {
+                                "name": "INIT_CONFIG",
+                                "value": "kyverno"
+                            },
+                            {
+                                "name": "METRICS_CONFIG",
+                                "value": "kyverno-metrics"
+                            },
+                            {
+                                "name": "KYVERNO_NAMESPACE",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.namespace"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "KYVERNO_POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "KYVERNO_SERVICEACCOUNT_NAME",
+                                "value": "kyverno-admission-controller"
+                            },
+                            {
+                                "name": "KYVERNO_ROLE_NAME",
+                                "value": "kyverno:admission-controller"
+                            },
+                            {
+                                "name": "KYVERNO_SVC",
+                                "value": "kyverno-svc"
+                            },
+                            {
+                                "name": "TUF_ROOT",
+                                "value": "/.sigstore"
+                            },
+                            {
+                                "name": "KYVERNO_DEPLOYMENT",
+                                "value": "kyverno-admission-controller"
+                            }
+                        ],
+                        "image": "reg.kyverno.io/kyverno/kyverno:v1.19.2",
+                        "imagePullPolicy": "IfNotPresent",
+                        "livenessProbe": {
+                            "failureThreshold": 2,
+                            "httpGet": {
+                                "path": "/health/liveness",
+                                "port": 9443,
+                                "scheme": "HTTPS"
+                            },
+                            "initialDelaySeconds": 15,
+                            "periodSeconds": 30,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 5
+                        },
+                        "name": "kyverno",
+                        "ports": [
+                            {
+                                "containerPort": 9443,
+                                "name": "https",
+                                "protocol": "TCP"
+                            },
+                            {
+                                "containerPort": 8000,
+                                "name": "metrics-port",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "failureThreshold": 6,
+                            "httpGet": {
+                                "path": "/health/readiness",
+                                "port": 9443,
+                                "scheme": "HTTPS"
+                            },
+                            "initialDelaySeconds": 5,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 5
+                        },
+                        "resources": {
+                            "limits": {
+                                "memory": "384Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "128Mi"
+                            }
+                        },
+                        "securityContext": {
+                            "allowPrivilegeEscalation": false,
+                            "capabilities": {
+                                "drop": [
+                                    "ALL"
+                                ]
+                            },
+                            "privileged": false,
+                            "readOnlyRootFilesystem": true,
+                            "runAsGroup": 65534,
+                            "runAsNonRoot": true,
+                            "runAsUser": 65534,
+                            "seccompProfile": {
+                                "type": "RuntimeDefault"
+                            }
+                        },
+                        "startupProbe": {
+                            "failureThreshold": 20,
+                            "httpGet": {
+                                "path": "/health/liveness",
+                                "port": 9443,
+                                "scheme": "HTTPS"
+                            },
+                            "initialDelaySeconds": 2,
+                            "periodSeconds": 6,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/.sigstore",
+                                "name": "sigstore"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kyverno/apicall",
+                                "name": "apicall-token",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-8bs2c",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "initContainers": [
+                    {
+                        "args": [
+                            "--loggingFormat=text",
+                            "--v=2",
+                            "--openreportsEnabled=false"
+                        ],
+                        "env": [
+                            {
+                                "name": "KYVERNO_SERVICEACCOUNT_NAME",
+                                "value": "kyverno-admission-controller"
+                            },
+                            {
+                                "name": "KYVERNO_ROLE_NAME",
+                                "value": "kyverno:admission-controller"
+                            },
+                            {
+                                "name": "INIT_CONFIG",
+                                "value": "kyverno"
+                            },
+                            {
+                                "name": "METRICS_CONFIG",
+                                "value": "kyverno-metrics"
+                            },
+                            {
+                                "name": "KYVERNO_NAMESPACE",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.namespace"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "KYVERNO_POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "KYVERNO_DEPLOYMENT",
+                                "value": "kyverno-admission-controller"
+                            },
+                            {
+                                "name": "KYVERNO_SVC",
+                                "value": "kyverno-svc"
+                            }
+                        ],
+                        "image": "reg.kyverno.io/kyverno/kyvernopre:v1.19.2",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "kyverno-pre",
+                        "resources": {
+                            "limits": {
+                                "cpu": "100m",
+                                "memory": "256Mi"
+                            },
+                            "requests": {
+                                "cpu": "10m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "securityContext": {
+                            "allowPrivilegeEscalation": false,
+                            "capabilities": {
+                                "drop": [
+                                    "ALL"
+                                ]
+                            },
+                            "privileged": false,
+                            "readOnlyRootFilesystem": true,
+                            "runAsGroup": 65534,
+                            "runAsNonRoot": true,
+                            "runAsUser": 65534,
+                            "seccompProfile": {
+                                "type": "RuntimeDefault"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-8bs2c",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "nodeName": "prove-lab-b387df5c-control-plane",
+                "nodeSelector": {
+                    "kubernetes.io/os": "linux"
+                },
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "kyverno-admission-controller",
+                "serviceAccountName": "kyverno-admission-controller",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "emptyDir": {},
+                        "name": "sigstore"
+                    },
+                    {
+                        "name": "apicall-token",
+                        "projected": {
+                            "defaultMode": 292,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "audience": "kyverno-svc.kyverno.io",
+                                        "expirationSeconds": 3600,
+                                        "path": "token"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "kube-api-access-8bs2c",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:50:27Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:50:43Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:50:50Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:50:50Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:50:26Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "100m",
+                            "memory": "128Mi"
+                        },
+                        "containerID": "containerd://8061bb4c094a6d0c47261a71920b25f8bf993fe6b19dc78d6cc88087258657e2",
+                        "image": "reg.kyverno.io/kyverno/kyverno:v1.19.2",
+                        "imageID": "reg.kyverno.io/kyverno/kyverno@sha256:c8c4dd09e720d2cd7fd24ca73ac28e46651001372f988e0cba3f2f612f04b955",
+                        "lastState": {},
+                        "name": "kyverno",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "memory": "384Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "128Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-18T00:50:44Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 65534,
+                                "supplementalGroups": [
+                                    65534
+                                ],
+                                "uid": 65534
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/.sigstore",
+                                "name": "sigstore"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kyverno/apicall",
+                                "name": "apicall-token",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-8bs2c",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "172.23.0.2",
+                "hostIPs": [
+                    {
+                        "ip": "172.23.0.2"
+                    }
+                ],
+                "initContainerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "10m",
+                            "memory": "64Mi"
+                        },
+                        "containerID": "containerd://d47ad1ec50697f82f4d444227c8c8b4ac23bd44c964af647c59fa123da23d0af",
+                        "image": "reg.kyverno.io/kyverno/kyvernopre:v1.19.2",
+                        "imageID": "reg.kyverno.io/kyverno/kyvernopre@sha256:27f3cc52e628559b56d08363b85316819802086c9808606914f7805a244148f4",
+                        "lastState": {},
+                        "name": "kyverno-pre",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "cpu": "100m",
+                                "memory": "256Mi"
+                            },
+                            "requests": {
+                                "cpu": "10m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "containerd://d47ad1ec50697f82f4d444227c8c8b4ac23bd44c964af647c59fa123da23d0af",
+                                "exitCode": 0,
+                                "finishedAt": "2026-11-18T00:50:43Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-11-18T00:50:27Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 65534,
+                                "supplementalGroups": [
+                                    65534
+                                ],
+                                "uid": 65534
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-8bs2c",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.0.19",
+                "podIPs": [
+                    {
+                        "ip": "10.244.0.19"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-18T00:50:26Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-18T00:16:05Z",
+                "generateName": "kyverno-background-controller-569bc9b479-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "background-controller",
+                    "app.kubernetes.io/instance": "kyverno",
+                    "app.kubernetes.io/name": "kyverno-background-controller",
+                    "app.kubernetes.io/part-of": "kyverno",
+                    "app.kubernetes.io/version": "v1.19.2",
+                    "pod-template-hash": "569bc9b479"
+                },
+                "name": "kyverno-background-controller-569bc9b479-nbfph",
+                "namespace": "kyverno",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "kyverno-background-controller-569bc9b479",
+                        "uid": "651225f3-09c0-44d8-ba5c-be2a20e4a4e7"
+                    }
+                ],
+                "resourceVersion": "799",
+                "uid": "e2967245-f301-4e54-a469-e7e799a0cad5"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchExpressions": [
+                                            {
+                                                "key": "app.kubernetes.io/component",
+                                                "operator": "In",
+                                                "values": [
+                                                    "background-controller"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 1
+                            }
+                        ]
+                    }
+                },
+                "automountServiceAccountToken": true,
+                "containers": [
+                    {
+                        "args": [
+                            "--disableMetrics=false",
+                            "--otelConfig=prometheus",
+                            "--metricsPort=8000",
+                            "--resyncPeriod=15m",
+                            "--enableConfigMapCaching=true",
+                            "--controllerRuntimeMetricsAddress=:8080",
+                            "--enableDeferredLoading=true",
+                            "--maxAPICallResponseLength=2000000",
+                            "--apiCallTimeout=30s",
+                            "--maxGlobalContextEntries=0",
+                            "--loggingFormat=text",
+                            "--v=2",
+                            "--omitEvents=PolicyApplied,PolicySkipped",
+                            "--enablePolicyException=false",
+                            "--enableReporting=validate,mutate,mutateExisting,imageVerify,generate"
+                        ],
+                        "env": [
+                            {
+                                "name": "KYVERNO_SERVICEACCOUNT_NAME",
+                                "value": "kyverno-background-controller"
+                            },
+                            {
+                                "name": "KYVERNO_DEPLOYMENT",
+                                "value": "kyverno-background-controller"
+                            },
+                            {
+                                "name": "INIT_CONFIG",
+                                "value": "kyverno"
+                            },
+                            {
+                                "name": "METRICS_CONFIG",
+                                "value": "kyverno-metrics"
+                            },
+                            {
+                                "name": "KYVERNO_POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "KYVERNO_NAMESPACE",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.namespace"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "reg.kyverno.io/kyverno/background-controller:v1.19.2",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "controller",
+                        "ports": [
+                            {
+                                "containerPort": 9443,
+                                "name": "https",
+                                "protocol": "TCP"
+                            },
+                            {
+                                "containerPort": 8000,
+                                "name": "metrics",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "resources": {
+                            "limits": {
+                                "memory": "128Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "securityContext": {
+                            "allowPrivilegeEscalation": false,
+                            "capabilities": {
+                                "drop": [
+                                    "ALL"
+                                ]
+                            },
+                            "privileged": false,
+                            "readOnlyRootFilesystem": true,
+                            "runAsGroup": 65534,
+                            "runAsNonRoot": true,
+                            "runAsUser": 65534,
+                            "seccompProfile": {
+                                "type": "RuntimeDefault"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kyverno/apicall",
+                                "name": "apicall-token",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-wt9sf",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "prove-lab-b387df5c-control-plane",
+                "nodeSelector": {
+                    "kubernetes.io/os": "linux"
+                },
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "kyverno-background-controller",
+                "serviceAccountName": "kyverno-background-controller",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "apicall-token",
+                        "projected": {
+                            "defaultMode": 292,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "audience": "kyverno-svc.kyverno.io",
+                                        "expirationSeconds": 3600,
+                                        "path": "token"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "kube-api-access-wt9sf",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:23Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:05Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:23Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:23Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:05Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "100m",
+                            "memory": "64Mi"
+                        },
+                        "containerID": "containerd://e0844691197331fdfe7cb73d09dd0ca6e3458cf8f2542e381e97b0e557d61970",
+                        "image": "reg.kyverno.io/kyverno/background-controller:v1.19.2",
+                        "imageID": "reg.kyverno.io/kyverno/background-controller@sha256:c46e124f21ef8a6bb4b48de57106808b1007edcd5ddd4ff7df5d23b9efa60ce2",
+                        "lastState": {},
+                        "name": "controller",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "memory": "128Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-18T00:16:23Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 65534,
+                                "supplementalGroups": [
+                                    65534
+                                ],
+                                "uid": 65534
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kyverno/apicall",
+                                "name": "apicall-token",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-wt9sf",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "172.23.0.2",
+                "hostIPs": [
+                    {
+                        "ip": "172.23.0.2"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.0.6",
+                "podIPs": [
+                    {
+                        "ip": "10.244.0.6"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-18T00:16:05Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-18T00:16:05Z",
+                "generateName": "kyverno-cleanup-controller-c655b4dc6-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "cleanup-controller",
+                    "app.kubernetes.io/instance": "kyverno",
+                    "app.kubernetes.io/name": "kyverno-cleanup-controller",
+                    "app.kubernetes.io/part-of": "kyverno",
+                    "app.kubernetes.io/version": "v1.19.2",
+                    "pod-template-hash": "c655b4dc6"
+                },
+                "name": "kyverno-cleanup-controller-c655b4dc6-4cvqz",
+                "namespace": "kyverno",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "kyverno-cleanup-controller-c655b4dc6",
+                        "uid": "1c59e539-7c93-49b9-af46-fae9634bfcb5"
+                    }
+                ],
+                "resourceVersion": "847",
+                "uid": "ab111bd3-ba39-4c63-9aa6-e80d8642fc72"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchExpressions": [
+                                            {
+                                                "key": "app.kubernetes.io/component",
+                                                "operator": "In",
+                                                "values": [
+                                                    "cleanup-controller"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 1
+                            }
+                        ]
+                    }
+                },
+                "automountServiceAccountToken": true,
+                "containers": [
+                    {
+                        "args": [
+                            "--caSecretName=kyverno-cleanup-controller.kyverno.svc.kyverno-tls-ca",
+                            "--tlsSecretName=kyverno-cleanup-controller.kyverno.svc.kyverno-tls-pair",
+                            "--tlsKeyAlgorithm=RSA",
+                            "--servicePort=443",
+                            "--resyncPeriod=15m",
+                            "--cleanupServerPort=9443",
+                            "--disableMetrics=false",
+                            "--otelConfig=prometheus",
+                            "--metricsPort=8000",
+                            "--enableDeferredLoading=true",
+                            "--dumpPayload=false",
+                            "--maxAPICallResponseLength=2000000",
+                            "--apiCallTimeout=30s",
+                            "--maxGlobalContextEntries=0",
+                            "--loggingFormat=text",
+                            "--v=2",
+                            "--protectManagedResources=false",
+                            "--ttlReconciliationInterval=1m"
+                        ],
+                        "env": [
+                            {
+                                "name": "KYVERNO_DEPLOYMENT",
+                                "value": "kyverno-cleanup-controller"
+                            },
+                            {
+                                "name": "INIT_CONFIG",
+                                "value": "kyverno"
+                            },
+                            {
+                                "name": "METRICS_CONFIG",
+                                "value": "kyverno-metrics"
+                            },
+                            {
+                                "name": "KYVERNO_POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "KYVERNO_SERVICEACCOUNT_NAME",
+                                "value": "kyverno-cleanup-controller"
+                            },
+                            {
+                                "name": "KYVERNO_ROLE_NAME",
+                                "value": "kyverno:cleanup-controller"
+                            },
+                            {
+                                "name": "KYVERNO_NAMESPACE",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.namespace"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "KYVERNO_SVC",
+                                "value": "kyverno-cleanup-controller"
+                            }
+                        ],
+                        "image": "reg.kyverno.io/kyverno/cleanup-controller:v1.19.2",
+                        "imagePullPolicy": "IfNotPresent",
+                        "livenessProbe": {
+                            "failureThreshold": 2,
+                            "httpGet": {
+                                "path": "/health/liveness",
+                                "port": 9443,
+                                "scheme": "HTTPS"
+                            },
+                            "initialDelaySeconds": 15,
+                            "periodSeconds": 30,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 5
+                        },
+                        "name": "controller",
+                        "ports": [
+                            {
+                                "containerPort": 9443,
+                                "name": "https",
+                                "protocol": "TCP"
+                            },
+                            {
+                                "containerPort": 8000,
+                                "name": "metrics",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "failureThreshold": 6,
+                            "httpGet": {
+                                "path": "/health/readiness",
+                                "port": 9443,
+                                "scheme": "HTTPS"
+                            },
+                            "initialDelaySeconds": 5,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 5
+                        },
+                        "resources": {
+                            "limits": {
+                                "memory": "128Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "securityContext": {
+                            "allowPrivilegeEscalation": false,
+                            "capabilities": {
+                                "drop": [
+                                    "ALL"
+                                ]
+                            },
+                            "privileged": false,
+                            "readOnlyRootFilesystem": true,
+                            "runAsGroup": 65534,
+                            "runAsNonRoot": true,
+                            "runAsUser": 65534,
+                            "seccompProfile": {
+                                "type": "RuntimeDefault"
+                            }
+                        },
+                        "startupProbe": {
+                            "failureThreshold": 20,
+                            "httpGet": {
+                                "path": "/health/liveness",
+                                "port": 9443,
+                                "scheme": "HTTPS"
+                            },
+                            "initialDelaySeconds": 2,
+                            "periodSeconds": 6,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kyverno/apicall",
+                                "name": "apicall-token",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-zkmn4",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "prove-lab-b387df5c-control-plane",
+                "nodeSelector": {
+                    "kubernetes.io/os": "linux"
+                },
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "kyverno-cleanup-controller",
+                "serviceAccountName": "kyverno-cleanup-controller",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "apicall-token",
+                        "projected": {
+                            "defaultMode": 292,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "audience": "kyverno-svc.kyverno.io",
+                                        "expirationSeconds": 3600,
+                                        "path": "token"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "kube-api-access-zkmn4",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:32Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:05Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:37Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:37Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:05Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "100m",
+                            "memory": "64Mi"
+                        },
+                        "containerID": "containerd://150d21608b37090ada2d26012577d2c6852f7769fcab9d1b572ad5871a2a6085",
+                        "image": "reg.kyverno.io/kyverno/cleanup-controller:v1.19.2",
+                        "imageID": "reg.kyverno.io/kyverno/cleanup-controller@sha256:d7340aa7c9315080c3dafa7b765d090ced37353e89e5cd7a3f9ac69e8fb532b2",
+                        "lastState": {},
+                        "name": "controller",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "memory": "128Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-18T00:16:32Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 65534,
+                                "supplementalGroups": [
+                                    65534
+                                ],
+                                "uid": 65534
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kyverno/apicall",
+                                "name": "apicall-token",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-zkmn4",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "172.23.0.2",
+                "hostIPs": [
+                    {
+                        "ip": "172.23.0.2"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.0.8",
+                "podIPs": [
+                    {
+                        "ip": "10.244.0.8"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-18T00:16:05Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-18T00:16:05Z",
+                "generateName": "kyverno-reports-controller-6b66b75587-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "reports-controller",
+                    "app.kubernetes.io/instance": "kyverno",
+                    "app.kubernetes.io/name": "kyverno-reports-controller",
+                    "app.kubernetes.io/part-of": "kyverno",
+                    "app.kubernetes.io/version": "v1.19.2",
+                    "pod-template-hash": "6b66b75587"
+                },
+                "name": "kyverno-reports-controller-6b66b75587-pwprp",
+                "namespace": "kyverno",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "kyverno-reports-controller-6b66b75587",
+                        "uid": "e4b3d627-9204-46f6-a598-14fa18de06a8"
+                    }
+                ],
+                "resourceVersion": "866",
+                "uid": "c7f21ec2-f4d5-49fd-ba52-8144244b8c90"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchExpressions": [
+                                            {
+                                                "key": "app.kubernetes.io/component",
+                                                "operator": "In",
+                                                "values": [
+                                                    "reports-controller"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 1
+                            }
+                        ]
+                    }
+                },
+                "automountServiceAccountToken": true,
+                "containers": [
+                    {
+                        "args": [
+                            "--disableMetrics=false",
+                            "--openreportsEnabled=false",
+                            "--otelConfig=prometheus",
+                            "--metricsPort=8000",
+                            "--resyncPeriod=15m",
+                            "--admissionReports=true",
+                            "--aggregateReports=true",
+                            "--policyReports=true",
+                            "--validatingAdmissionPolicyReports=true",
+                            "--mutatingAdmissionPolicyReports=false",
+                            "--backgroundScan=true",
+                            "--backgroundScanWorkers=2",
+                            "--backgroundScanInterval=1h",
+                            "--skipResourceFilters=true",
+                            "--enableConfigMapCaching=true",
+                            "--enableDeferredLoading=true",
+                            "--maxAPICallResponseLength=2000000",
+                            "--apiCallTimeout=30s",
+                            "--maxGlobalContextEntries=0",
+                            "--loggingFormat=text",
+                            "--v=2",
+                            "--omitEvents=PolicyApplied,PolicySkipped",
+                            "--enablePolicyException=false",
+                            "--allowInsecureRegistry=false",
+                            "--registryCredentialHelpers=default,google,amazon,azure,github",
+                            "--enableReporting=validate,mutate,mutateExisting,imageVerify,generate"
+                        ],
+                        "env": [
+                            {
+                                "name": "KYVERNO_SERVICEACCOUNT_NAME",
+                                "value": "kyverno-reports-controller"
+                            },
+                            {
+                                "name": "KYVERNO_DEPLOYMENT",
+                                "value": "kyverno-reports-controller"
+                            },
+                            {
+                                "name": "INIT_CONFIG",
+                                "value": "kyverno"
+                            },
+                            {
+                                "name": "METRICS_CONFIG",
+                                "value": "kyverno-metrics"
+                            },
+                            {
+                                "name": "KYVERNO_POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "KYVERNO_NAMESPACE",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.namespace"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "TUF_ROOT",
+                                "value": "/.sigstore"
+                            }
+                        ],
+                        "image": "reg.kyverno.io/kyverno/reports-controller:v1.19.2",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "controller",
+                        "ports": [
+                            {
+                                "containerPort": 9443,
+                                "name": "https",
+                                "protocol": "TCP"
+                            },
+                            {
+                                "containerPort": 8000,
+                                "name": "metrics",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "resources": {
+                            "limits": {
+                                "memory": "128Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "securityContext": {
+                            "allowPrivilegeEscalation": false,
+                            "capabilities": {
+                                "drop": [
+                                    "ALL"
+                                ]
+                            },
+                            "privileged": false,
+                            "readOnlyRootFilesystem": true,
+                            "runAsGroup": 65534,
+                            "runAsNonRoot": true,
+                            "runAsUser": 65534,
+                            "seccompProfile": {
+                                "type": "RuntimeDefault"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/.sigstore",
+                                "name": "sigstore"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kyverno/apicall",
+                                "name": "apicall-token",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-xq85v",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "prove-lab-b387df5c-control-plane",
+                "nodeSelector": {
+                    "kubernetes.io/os": "linux"
+                },
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "kyverno-reports-controller",
+                "serviceAccountName": "kyverno-reports-controller",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "emptyDir": {},
+                        "name": "sigstore"
+                    },
+                    {
+                        "name": "apicall-token",
+                        "projected": {
+                            "defaultMode": 292,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "audience": "kyverno-svc.kyverno.io",
+                                        "expirationSeconds": 3600,
+                                        "path": "token"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "kube-api-access-xq85v",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:40Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:05Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:40Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:40Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-18T00:16:05Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "100m",
+                            "memory": "64Mi"
+                        },
+                        "containerID": "containerd://7f5b52190520c23699f1cedab49708b1de92c371a65582677633260b2d09e85b",
+                        "image": "reg.kyverno.io/kyverno/reports-controller:v1.19.2",
+                        "imageID": "reg.kyverno.io/kyverno/reports-controller@sha256:5fb6d3e738050dbce84f60ecabaede7665fbe0578d07c1e8c912443b035e79c3",
+                        "lastState": {},
+                        "name": "controller",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "memory": "128Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-18T00:16:39Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 65534,
+                                "supplementalGroups": [
+                                    65534
+                                ],
+                                "uid": 65534
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/.sigstore",
+                                "name": "sigstore"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kyverno/apicall",
+                                "name": "apicall-token",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-xq85v",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "172.23.0.2",
+                "hostIPs": [
+                    {
+                        "ip": "172.23.0.2"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.0.7",
+                "podIPs": [
+                    {
+                        "ip": "10.244.0.7"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-18T00:16:05Z"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

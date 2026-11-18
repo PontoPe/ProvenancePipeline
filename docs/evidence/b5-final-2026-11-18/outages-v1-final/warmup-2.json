@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 0,
+  "seconds": 14.957544876029715,
+  "stdout": "pod/warmup-2 created (server dry run)\n",
+  "stderr": ""
+}

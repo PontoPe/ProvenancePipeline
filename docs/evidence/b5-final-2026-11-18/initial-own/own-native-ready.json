@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "-n",
+    "prove-lab",
+    "wait",
+    "--for=condition=Ready",
+    "pod/own-native",
+    "--timeout=120s"
+  ],
+  "rc": 0,
+  "seconds": 5.664132901933044,
+  "stdout": "pod/own-native condition met\n",
+  "stderr": ""
+}

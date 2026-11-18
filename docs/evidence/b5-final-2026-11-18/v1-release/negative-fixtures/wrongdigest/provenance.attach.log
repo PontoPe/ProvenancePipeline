@@ -1,0 +1,7 @@
+Preparing wrongdigest/provenance.bundle.json
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Exists    4cb93293bbea wrongdigest/provenance.bundle.json
+Uploading 0ba4f19ded94 application/vnd.oci.image.manifest.v1+json
+Uploaded  0ba4f19ded94 application/vnd.oci.image.manifest.v1+json
+Attached to [registry] ghcr.io/pontope/provenancepipeline@sha256:50bf0a2f13d10ddd992c2999ea517a9e12d7bd5db910f2c891ad3cd417964f15
+Digest: sha256:0ba4f19ded94b38c6a1e30e677bcfd9590ec25a0c1ca9a91f5e891851a0e122c

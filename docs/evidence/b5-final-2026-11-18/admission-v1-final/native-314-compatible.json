@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "--dry-run=server",
+    "-f",
+    "-"
+  ],
+  "rc": 0,
+  "seconds": 5.833144029835239,
+  "stdout": "pod/native-314-compatible created (server dry run)\n",
+  "stderr": ""
+}

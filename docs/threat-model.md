@@ -1,5 +1,13 @@
 # Threat model — Provenance Pipeline
 
+Current evidence superseding the historical T9/B5 implementation status below:
+[own-proof live experiment](evidence/b5-own-proof-2026-11-18.md). Own v1 admission
+and health without GitHub's writer are verified; exact-head release is green.
+Native Cosign3.1.4 remote discovery is ALSO compatible (earlier local-save-only
+inference was wrong). Final independent operational review remains pending.
+Network webhook faults fail closed; graceful privileged deregistration is NOT
+covered by that claim. The one-shot restricted observer is not continuous alerting.
+
 ## Scope
 
 The path from source commit to a running container: CI build, SBOM, scan, signing, attestation, registry, and admission control. The application's own logic is out of scope; the cluster's runtime hardening lives in [KateClusters](../../KateClusters).

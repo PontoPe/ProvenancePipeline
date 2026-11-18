@@ -1,0 +1,7 @@
+Preparing badpredicate/signature.bundle.json
+Exists    44136fa355b3 application/vnd.oci.empty.v1+json
+Exists    4df22186bb3f badpredicate/signature.bundle.json
+Uploading 190697b28cc8 application/vnd.oci.image.manifest.v1+json
+Uploaded  190697b28cc8 application/vnd.oci.image.manifest.v1+json
+Attached to [registry] ghcr.io/pontope/provenancepipeline@sha256:e32e961d471f6de7522c658e2e4214001b78ef35bb3883858f73dd38353c85c0
+Digest: sha256:190697b28cc89f314856877186d4d7c80c157ca1373da7ae8bf089c509887669

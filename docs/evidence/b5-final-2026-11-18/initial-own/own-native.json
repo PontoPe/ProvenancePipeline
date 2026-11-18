@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "kubectl",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--request-timeout=45s",
+    "create",
+    "-f",
+    "-"
+  ],
+  "rc": 0,
+  "seconds": 15.228536115027964,
+  "stdout": "pod/own-native created\n",
+  "stderr": ""
+}

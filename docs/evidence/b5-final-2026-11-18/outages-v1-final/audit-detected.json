@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "python3",
+    "/home/pontope/Coding/ProvenancePipeline/scripts/check_enforcement.py",
+    "--context",
+    "kind-prove-lab-b387df5c",
+    "--out",
+    ".lab/round2/outages-v1-final/audit-detected"
+  ],
+  "rc": 1,
+  "seconds": 0.10031878296285868,
+  "stdout": "{\"status\": \"rejected\", \"error\": \"policy spec drift: reviewed contract differs\"}\n",
+  "stderr": ""
+}
