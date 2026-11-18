@@ -17,6 +17,10 @@ on:
         description: Prove own-only publication (no GitHub attestation writer)
         type: boolean
         default: true
+      publish_negative_fixtures:
+        description: Publish intentionally invalid B5 lab artifacts under b5-* tags
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -243,6 +247,13 @@ jobs:
           REVISION: ${{ github.sha }}
         run: bash scripts/publish-bundles.sh
 
+      - name: publish intentional negative fixtures
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_negative_fixtures == true
+        env:
+          REF: ${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}
+          IDENTITY: ${{ steps.meta.outputs.identity }}
+        run: bash scripts/publish-negative-fixtures.sh
+
       - name: preserve publication evidence even on failure
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -250,6 +261,7 @@ jobs:
           name: own-publication
           path: |
             publication/
+            negative-fixtures/
             *.bundle.json
           if-no-files-found: error
 
